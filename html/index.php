@@ -405,6 +405,7 @@ $page_title = xd_utilities\getConfiguration('general', 'title');
     <script type="text/javascript" src="gui/lib/Portal.js"></script>
     <script type="text/javascript" src="gui/lib/PortalColumn.js"></script>
     <script type="text/javascript" src="gui/lib/Portlet.js"></script>
+    <script type="text/javascript" src="gui/js/Portlet.js"></script>
 
     <?php if ($userLoggedIn): ?>
         <link rel="stylesheet" type="text/css" href="gui/css/TreeCheckbox.css"/>
