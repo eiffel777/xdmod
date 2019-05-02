@@ -111,6 +111,55 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
 
                     portalwindow.add(portal);
                     portalwindow.doLayout();
+
+                    if(CCR.xdmod.publicUser !== true){
+                        var conn = new Ext.data.Connection();
+
+                        conn.request({
+                            url: XDMoD.REST.url+'/summary/viewedUserTour',
+                            params: {
+                                data: Ext.encode({
+                                  uid: CCR.xdmod.ui.mappedPID,
+                                  token: XDMoD.REST.token
+                                })
+                            },
+                            method: 'GET',
+                            callback: function(options, success, response) {
+                                var resp = Ext.decode(response.responseText);
+                                if(resp.data.length == 0 || !resp.data[0].viewedTour){
+                                    Ext.Msg.show({
+                                        cls: 'new-user-tour-dialog-container',
+                                        title: "New User Tour",
+                                        msg: "Welcome to XDMoD.<br /><br /><input type='checkbox' id='new-user-tour-checkbox' /> Please don't show me this again.",
+                                        buttons: Ext.Msg.YESNO,
+                                        icon: Ext.Msg.INFO,
+                                        fn: function(buttonValue, inputText, showConfig){
+                                            var newUserTourCheckbox = Ext.select('#new-user-tour-checkbox');
+                                            if (buttonValue === 'yes') {
+                                                self.createNewUserTour();
+                                            } else if (buttonValue === 'no' && newUserTourCheckbox.elements[0].checked === true) {
+                                                var conn = new Ext.data.Connection();
+                                                conn.request({
+                                                    url: XDMoD.REST.url + '/summary/viewedUserTour',
+                                                    params: {
+                                                        data: Ext.encode({
+                                                            viewedTour: 1,
+                                                            uid: CCR.xdmod.ui.mappedPID,
+                                                            token: XDMoD.REST.token
+                                                        })
+                                                    },
+                                                    method: 'POST',
+                                                    callback: function(options, success, response) {
+                                                        Ext.Msg.alert('Status', 'This message will not be displayed again. Welcome to XDMoD');
+                                                    } //callback
+                                                }); //conn.request
+                                            }
+                                        }
+                                    });
+                                }
+                            } //callback
+                        }); //conn.request
+                    }
                 }
             }
         });
@@ -129,5 +178,70 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
         });
 
         XDMoD.Module.Summary.superclass.initComponent.apply(this, arguments);
+    },
+
+    newUserTourCallback: function(buttonValue, inputText, showConfig){
+        var newUserTourCheckbox = Ext.select('#new-user-tour-checkbox');
+        if(buttonValue === 'yes'){
+            this.createNewUserTour();
+        }
+        else if(buttonValue === 'no' && newUserTourCheckbox.elements[0].checked === true ){
+            var conn = new Ext.data.Connection();
+            conn.request({
+                url: XDMoD.REST.url+'/summary/viewedUserTour',
+                params: {
+                    data: Ext.encode({
+                      viewedTour: 1,
+                      uid: CCR.xdmod.ui.mappedPID,
+                      token: XDMoD.REST.token
+                    })
+                },
+                method: 'POST',
+                callback: function(options, success, response) {
+                    Ext.Msg.alert('Status', 'This message will not be displayed again. Welcome to XDMoD');
+                } //callback
+            }); //conn.request
+        }
+    },
+
+    createNewUserTour: function(){
+        var userTour = new Ext.ux.HelpTipTour({
+            title: 'New User Tour',
+            items: [
+              new Ext.ux.HelpTip({
+                  html: "Welcome to XDMoD",
+                  target: "#tg_summary",
+                  position: "b-t"
+              }),
+              new Ext.ux.HelpTip({
+                  html: "XDMoD has a tab based navigation.",
+                  target: "#main_tab_panel .x-tab-panel-header",
+                  position: "tl-bl"
+              }),
+              new Ext.ux.HelpTip({
+                  html: "This is a portlet.",
+                  target: ".x-portlet:first",
+                  position: "tl-br"
+              }),
+              new Ext.ux.HelpTip({
+                  html: "This is the help button.",
+                  target: "#global-toolbar-dashboard",
+                  position: "tl-bl",
+                  listener: {
+                      render: function(){
+                          console.log('before render');
+                          Ext.get('help_button').dom.click()
+                      }
+                  }
+              }),
+              new Ext.ux.HelpTip({
+                  html: "My Profile button.",
+                  target: "#global-toolbar-profile",
+                  position: "tl-br"
+              })
+            ]
+        });
+
+        userTour.startTour();
     }
 });

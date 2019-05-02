@@ -537,6 +537,14 @@ XDMoD.ExistingUsers = Ext.extend(Ext.Panel, {
 
         this.groupToggle = usersTypeSplitButton;
 
+        var resetNewUserTour = function () {
+            userManagementAction({
+                operation: 'reset_user_tour_viewed',
+                viewedTour: 0,
+                uid: selected_user_id
+            });
+        };
+
         // ------------------------------------------
 
         var actionEmptyReportImageCache = function () {
@@ -999,6 +1007,10 @@ XDMoD.ExistingUsers = Ext.extend(Ext.Panel, {
                 {
                     text: 'Empty Report Image Cache',
                     handler: actionEmptyReportImageCache
+                },
+                {
+                    text: 'Reset New User Tour',
+                    handler: resetNewUserTour
                 }
             ]
         });

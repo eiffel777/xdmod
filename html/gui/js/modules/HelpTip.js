@@ -75,12 +75,22 @@ Ext.ux.HelpTip = Ext.extend(Ext.Tip, {
 
     showBy : function(el, pos){
         if(!this.rendered){
-            this.render(Ext.getBody());
+           this.render(Ext.getBody());
         }
 
         this.createSpotlight();
         this.spotlight.show(el);
-        var position = this.el.getAlignToXY(el, pos || this.defaultAlign);
+        var position = this.el.getAlignToXY(el, pos);
+        var anchor_pos = pos.split('-');
+        var p = (anchor_pos.length > 1) ? anchor_pos[1] : anchor_pos[0];
+
+        var elem = Ext.get(el)
+        console.log(p);
+        console.log(elem);
+        var anchorF = elem.getAnchorXY(p, false);
+        var anchorT = elem.getAnchorXY(p, true);
+        console.log(anchorF);
+        console.log(anchorT);
         position[0] -= 10;
         position[1] += 7;
         this.showAt(position);
