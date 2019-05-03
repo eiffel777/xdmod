@@ -23,6 +23,7 @@ Ext.ux.HelpTip = Ext.extend(Ext.Tip, {
     bbar: [],
     autoHide: false,
     closable: true,
+    offset: null,
     initComponent : function(){
         Ext.ToolTip.superclass.initComponent.call(this);
     },
@@ -85,14 +86,20 @@ Ext.ux.HelpTip = Ext.extend(Ext.Tip, {
         var p = (anchor_pos.length > 1) ? anchor_pos[1] : anchor_pos[0];
 
         var elem = Ext.get(el)
-        console.log(p);
+        /*console.log(p);
         console.log(elem);
         var anchorF = elem.getAnchorXY(p, false);
         var anchorT = elem.getAnchorXY(p, true);
         console.log(anchorF);
-        console.log(anchorT);
+        console.log(anchorT);*/
         position[0] -= 10;
         position[1] += 7;
+
+        if(this.offset !== null){
+            position[0] += this.offset[0];
+            position[1] += this.offset[1];
+        }
+
         this.showAt(position);
         this.syncAnchor();
     },

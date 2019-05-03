@@ -210,10 +210,9 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
             items: [
               new Ext.ux.HelpTip({
                   html: `Welcome to Open XDMoD! Open XDMoD is an open source tool to facilitate the management of
-                         high performance computing resources. It is widely deployed at academic, industrial and governmental
-                         HPC centers. Open XDMoD’s management capabilities include monitoring standard metrics such as
-                         utilization, providing quality of service metrics designed to proactively identify underperforming
-                         system hardware and software,`,
+                         high performance computing resources. <br /><br />Open XDMoD’s management capabilities
+                         include monitoring standard metrics such as utilization, providing quality of service
+                         metrics designed to proactively identify underperforming system hardware and software.`,
                   target: "#tg_summary",
                   position: "b-t"
               }),
@@ -221,25 +220,28 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                   html: `The XDMoD User Interface contains a wealth of information and has been organized into tabs
                          to compartmentalize the data. `,
                   target: "#main_tab_panel .x-tab-panel-header",
-                  position: "tl-bl"
+                  position: "tl-bl",
+                  offset: [20, 0]
               }),
               new Ext.ux.HelpTip({
                   html: `Your are currently on the Summary tab which provides a snapshot overview of selected
                          data with several small summary charts that can be expanded to full size charts.`,
                   target: "#tg_summary",
-                  position: "t-b"
+                  position: "b-t"
               }),
               new Ext.ux.HelpTip({
-                  html: "This is a portlet.",
+                  html: `The Summary tab is made up of several informational boxes called portlets. Each portlet
+                         contains .`,
                   target: ".x-portlet:first",
                   position: "tl-br"
               }),
               new Ext.ux.HelpTip({
-                  html: `Clicking on the Help menu will provide you with the following options: User Manual, FAQ and
-                         YouTube Channel. Clicking on User Manual will direct the user to the XDMoD User Manual.
-                         If help is available for the section of XDMoD you currently are visiting, the User Manual will
-                         automatically navigate to the respective section when it loads.  Clicking on FAQ will take you to
-                         a page containing Frequently Asked  Questions.`,
+                  html: `The Help button is located in the upper right corner of the screen and clicking on it
+                         will provide you with the following options: User Manual, FAQ and YouTube
+                         Channel.<br /><br />Clicking on User Manual will direct the user to the XDMoD User Manual.
+                         If help is available for the section of XDMoD you currently are visiting, the User Manual
+                         will automatically navigate to the respective section when it loads. Clicking on FAQ
+                         will take you to a page containing Frequently Asked Questions.`,
                   target: "#global-toolbar-dashboard",
                   position: "tl-bl",
                   listeners: {
@@ -249,11 +251,11 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                   }
               }),
               new Ext.ux.HelpTip({
-                  html: `The 'My Profile' button allows you to view and update general settings pertaining to your account.
-                         Your current role will be displayed in the title bar of the My Profile window.
-                         The first section in the My Profile window contains User Information such as: First Name,
-                         Last Name, and Email Address.  All of the aforementioned fields must be specified in order
-                         to update your profile.`,
+                  html: `The 'My Profile' button allows you to view and update general settings pertaining to your
+                         account. Your current role will be displayed in the title bar of the My Profile window.
+                         <br /><br />The first section in the My Profile window contains User Information such as:
+                         First Name, Last Name, and Email Address.  All of the aforementioned fields must be
+                         specified in order to update your profile.`,
                   target: "#global-toolbar-profile",
                   position: "tl-bl"
               })
