@@ -794,6 +794,13 @@ div.chart_thumb a {
     font: normal 12px tahoma, arial, helvetica, sans-serif;
     color: #31383D;
 }
+.base-help-tip ul {
+    list-style-type: disc;
+    margin: 10px 0px 0px 20px;
+}
+.base-help-tip li {
+    margin: 10px 0px;
+}
 .base-help-tip-bbar {
     background-color: #E9F3FF;
     color: #31383D;
