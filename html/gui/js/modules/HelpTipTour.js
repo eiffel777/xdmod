@@ -77,7 +77,7 @@ Ext.ux.HelpTipTour = Ext.extend(Ext.Component, {
         }
 
         this.addClickEventListeners();
-        this.current_tip.showBy(el, this.current_tip.position);
+        this.current_tip.showBy(el);
     },
 
     addClickEventListeners: function(){

@@ -23,8 +23,12 @@ Ext.ux.HelpTip = Ext.extend(Ext.Tip, {
     bbar: [],
     autoHide: false,
     closable: true,
-    offset: null,
+    offset: [0,0],
+    anchorOffset: 0,
     initComponent : function(){
+        var anchor = this.position.split('-');
+        this.tipAnchorPos = anchor[0];
+        this.targetAnchorPos = anchor[1];
         Ext.ToolTip.superclass.initComponent.call(this);
     },
     listeners: {
@@ -35,7 +39,14 @@ Ext.ux.HelpTip = Ext.extend(Ext.Tip, {
     // private
     onRender : function(ct, position){
         Ext.ToolTip.superclass.onRender.call(this, ct, position);
-        this.anchorCls = 'x-tip-anchor-top';
+        var anchorCls = {
+            't': 'x-tip-anchor-top',
+            'b': 'x-tip-anchor-bottom',
+            'r': 'x-tip-anchor-right',
+            'l': 'x-tip-anchor-left'
+        };
+
+        this.anchorCls = anchorCls[this.tipAnchorPos.charAt(0)]
         this.anchorEl = this.el.createChild({
             cls: 'x-tip-anchor ' + this.anchorCls
         });
@@ -48,64 +59,73 @@ Ext.ux.HelpTip = Ext.extend(Ext.Tip, {
     },
 
     syncAnchor : function(){
-        var anchorPos, targetPos, offset;
-        switch('t') {
+        var anchorPos, offset;
+        switch(this.tipAnchorPos) {
+            case 'tl':
+                anchorPos = 'b';
+                offset = [10+this.anchorOffset, 2];
+                break;
+            case 'tr':
+                anchorPos = 'b';
+                offset = [-10+this.anchorOffset, 2];
+                break;
             case 't':
                 anchorPos = 'b';
-                targetPos = 'tl';
-                offset = [10+this.anchorOffset, 2];
+                offset = [this.anchorOffset, 2];
                 break;
             case 'r':
                 anchorPos = 'l';
-                targetPos = 'tr';
-                offset = [-2, 11+this.anchorOffset];
+                offset = [-2, this.anchorOffset];
                 break;
             case 'b':
                 anchorPos = 't';
-                targetPos = 'bl';
+                offset = [this.anchorOffset, -2];
+                break;
+            case 'bl':
+                anchorPos = 't';
                 offset = [10+this.anchorOffset, -2];
+                break;
+            case 'br':
+                anchorPos = 't';
+                offset = [-10+this.anchorOffset, -2];
                 break;
             default:
                 anchorPos = 'r';
-                targetPos = 'tl';
-                offset = [12, 11+this.anchorOffset];
+                offset = [2, 11+this.anchorOffset];
                 break;
         }
-        this.anchorEl.alignTo(this.el, anchorPos+'-'+targetPos, offset);
+        this.anchorEl.alignTo(this.el, anchorPos+'-'+this.tipAnchorPos, offset);
     },
 
-    showBy : function(el, pos){
+    showBy : function(el){
         if(!this.rendered){
            this.render(Ext.getBody());
         }
 
-        this.createSpotlight();
-        this.spotlight.show(el);
-        var position = this.el.getAlignToXY(el, pos);
-        var anchor_pos = pos.split('-');
-        var p = (anchor_pos.length > 1) ? anchor_pos[1] : anchor_pos[0];
+        this.showAt([-1000,-1000]);
 
-        var elem = Ext.get(el)
-        /*console.log(p);
-        console.log(elem);
-        var anchorF = elem.getAnchorXY(p, false);
-        var anchorT = elem.getAnchorXY(p, true);
-        console.log(anchorF);
-        console.log(anchorT);*/
-        position[0] -= 10;
-        position[1] += 7;
-
-        if(this.offset !== null){
-            position[0] += this.offset[0];
-            position[1] += this.offset[1];
+        var alignmentOffsets = {
+            'bl': [0, -7],
+            'tl': [-10, 7],
+            't': [0, 7],
+            'b': [0, -7],
+            'tr': [17, 8],
+            'br': [19, -7],
+            'l': [7, 0],
+            'r': [-7, 0]
         }
 
-        this.showAt(position);
+        var offset = alignmentOffsets[this.tipAnchorPos].map(function(v, k){
+              return v + this.offset[k];
+        }, this);
+
+        this.createSpotlight();
+        this.spotlight.show(el);
+        this.showAt(this.el.getAlignToXY(el, this.position, offset));
         this.syncAnchor();
     },
 
     hideTip : function(){
-      this.spotlight.hide();
       this.hide();
     },
 
