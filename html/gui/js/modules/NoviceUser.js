@@ -263,13 +263,6 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                   offset: [-10, 0]
               }),
               new Ext.ux.HelpTip({
-                  html: `The Summary tab is made up of several informational boxes called portlets. Each portlet
-                         contains summary statistics, selected charts or other pieces of information that are
-                         useful to the role of the current user. `,
-                  target: ".x-portlet:nth(4)",
-                  position: "r-l"
-              }),
-              new Ext.ux.HelpTip({
                   html: `The Help button is located in the upper right corner of the screen and clicking on it
                          will provide you with the following options: User Manual, FAQ and YouTube
                          Channel.<br /><br />Clicking on User Manual will direct the user to the XDMoD User Manual.
