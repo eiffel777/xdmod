@@ -252,12 +252,15 @@ XDMoD.GlobalToolbar.Help = function (tabPanel) {
                 XDMoD.TrackEvent("Portal", "Help -> YouTube Channel Button Clicked");
                 window.open('https://www.youtube.com/channel/UChm_AbEcBryCdIfebN5Kkrg');
             }
-        },
-        {
-            text: 'View New User Tour',
-            id: 'global-toolbar-help-new-user-tour'
         }
     ];
+
+    if (CCR.xdmod.publicUser !== true) {
+          menuItems.push({
+              text: 'View XDMoD User Tour',
+              id: 'global-toolbar-help-new-user-tour'
+          });
+    }
 
     if (CCR.xdmod.features.xsede) {
         menuItems.splice(1, 0, {

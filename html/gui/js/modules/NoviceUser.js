@@ -306,11 +306,13 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
             ]
         });
 
-        Ext.get('help_button').on('click', function(){
-            Ext.get('global-toolbar-help-new-user-tour').on('click', function(){
-                userTour.startTour();
-            })
-        });
+        if (CCR.xdmod.publicUser !== true) {
+            Ext.get('help_button').on('click', function(){
+                Ext.get('global-toolbar-help-new-user-tour').on('click', function(){
+                    userTour.startTour();
+                })
+            });
+        }
 
         return userTour;
     }
