@@ -280,9 +280,15 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                          specified in order to update your profile.`,
                   target: "#global-toolbar-profile",
                   position: "tl-bl",
+              }),
+              new Ext.ux.HelpTip({
+                  html: `Thank you for viewing the XDMoD User Tour. If you want to view this tour again you can
+                         find it by clicking on the Help button in the upper right corner.`,
+                  target: "#tg_summary",
+                  position: "t-t",
                   listeners: {
-                      hide: function(){
-                        /*var conn = new Ext.data.Connection();
+                      show: function(){
+                        var conn = new Ext.data.Connection();
                         conn.request({
                             url: XDMoD.REST.url+'/summary/viewedUserTour',
                             params: {
@@ -293,11 +299,17 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                                 })
                             },
                             method: 'POST'
-                        }); //conn.request*/
+                        }); //conn.request
                       }
                   }
               })
             ]
+        });
+
+        Ext.get('help_button').on('click', function(){
+            Ext.get('global-toolbar-help-new-user-tour').on('click', function(){
+                userTour.startTour();
+            })
         });
 
         return userTour;
