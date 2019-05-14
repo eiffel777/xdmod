@@ -233,6 +233,11 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                          The Metric Explorer tab allows one to create complex plots containing multiple metrics. It
                          has many point & click features that allow the user to easily add, filter, and modify
                          the data and the format in which it is presented.
+                         </li>
+                         <li>
+                         The Report Generator tab displays any charts you have chosen to make available for
+                         building a report. It shows the the title of the chart, the delivery schedule, the
+                         delivery format and the number of charts.
                          </li></ul>`,
                   target: "#main_tab_panel .x-tab-panel-header",
                   position: "tl-bl",
@@ -241,23 +246,23 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
               }),
               new Ext.ux.HelpTip({
                   html: `Your are currently on the Summary tab which provides a snapshot overview of selected
-                         data with several small summary charts that display information such as the number
-                         of jobs run, average CPU time per job, and the average number of processors per job are
-                         displayed as well as selected charts that provide an overview of of selected available.`,
+                         data with several small summary charts. These charts display information such as the
+                         number of jobs run, average CPU time per job, and the average number of processors per
+                         job.`,
                   target: "#tg_summary",
                   position: "t-t"
               }),
               new Ext.ux.HelpTip({
                   html: `The Summary tab is made up of several informational boxes called portlets. Each portlet
                          contains summary statistics, selected charts or other pieces of information that are
-                         useful to the role of the current user. `,
+                         useful to the role of the current user.`,
                   target: ".x-portlet:first",
                   position: "l-r"
               }),
               new Ext.ux.HelpTip({
                   html: `From left to right, this toolbar provides a button for collapsing the portlet, a button
-                         to configure the chart, and a button that when hovered over will present a tooltip to
-                         describe the data in the chart.`,
+                         to configure information in the portlet, and a button that when hovered over will present
+                         a tooltip to describe the the information in the portlet.`,
                   target: ".x-portlet:first .x-panel-header:first",
                   position: 'tl-br',
                   offset: [-10, 0]
@@ -273,11 +278,10 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                   position: "tr-bl"
               }),
               new Ext.ux.HelpTip({
-                  html: `The 'My Profile' button allows you to view and update general settings pertaining to your
+                  html: `The My Profile button allows you to view and update general settings pertaining to your
                          account. Your current role will be displayed in the title bar of the My Profile window.
-                         <br /><br />The first section in the My Profile window contains User Information such as:
-                         First Name, Last Name, and Email Address.  All of the aforementioned fields must be
-                         specified in order to update your profile.`,
+                         <br /><br />Information you can update includes data such as your First Name, Last Name,
+                         Email Address and Password.`,
                   target: "#global-toolbar-profile",
                   position: "tl-bl",
               }),
@@ -309,7 +313,10 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
         if (CCR.xdmod.publicUser !== true) {
             Ext.get('help_button').on('click', function(){
                 Ext.get('global-toolbar-help-new-user-tour').on('click', function(){
-                    userTour.startTour();
+                    Ext.History.add('main_tab_panel:tg_summary');
+                    new Ext.util.DelayedTask(function(){
+                       userTour.startTour();
+                    }).delay(10);
                 })
             });
         }
