@@ -9,11 +9,6 @@ XDMoD.Module.Summary = function (config) {
 
 Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
     module_id: 'summary',
-    usesToolbar: true,
-
-    toolbarItems: {
-        durationSelector: true
-    },
 
     initComponent: function () {
         var self = this;
@@ -40,6 +35,11 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                         border: false,
                         listeners: {
                             drop: function () {
+                                if (CCR.xdmod.publicUser) {
+                                    // Public user cannot save layout no point in trying
+                                    return;
+                                }
+
                                 var row;
                                 var column;
                                 var portalCol;
@@ -72,7 +72,10 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                         }));
                     }
 
-                    var durationSelector = self.getDurationSelector();
+                    var durationSelector;
+                    if (self.getDurationSelector) {
+                        durationSelector = self.getDurationSelector();
+                    }
 
                     var portalwindow = self.getComponent('portalwindow');
                     portalwindow.removeAll();
@@ -80,10 +83,13 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                     this.each(function (record) {
                         var config = record.get('config');
 
-                        config.start_date = durationSelector.getStartDate().format('Y-m-d');
-                        config.end_date = durationSelector.getEndDate().format('Y-m-d');
-                        config.aggregation_unit = durationSelector.getAggregationUnit();
-                        config.timeframe_label = durationSelector.getDurationLabel();
+                        // duration selector only exists for public user view
+                        if (durationSelector) {
+                            config.start_date = durationSelector.getStartDate().format('Y-m-d');
+                            config.end_date = durationSelector.getEndDate().format('Y-m-d');
+                            config.aggregation_unit = durationSelector.getAggregationUnit();
+                            config.timeframe_label = durationSelector.getDurationLabel();
+                        }
 
                         try {
                             var portlet = Ext.ComponentMgr.create({
@@ -93,6 +99,7 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                                 width: portletWidth
                             });
                             portlet.relayEvents(self, ['duration_change']);
+                            portlet.relayEvents(self, ['refresh']);
 
                             if (record.get('column') === -1) {
                                 // The -1 columm is the full width panel above the portal
@@ -165,6 +172,13 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
             }
         });
 
+        if (CCR.xdmod.publicUser) {
+            this.usesToolbar = true;
+            this.toolbarItems = { durationSelector: true };
+        }
+
+        this.needsRefresh = true;
+
         Ext.apply(this, {
             items: [{
                 region: 'center',
@@ -172,8 +186,14 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                 autoScroll: true
             }],
             listeners: {
-                afterrender: function () {
-                    portletStore.load();
+                activate: function () {
+                    if (this.needsRefresh) {
+                        this.needsRefresh = false;
+                        portletStore.load();
+                    }
+                },
+                request_refresh: function () {
+                    this.needsRefresh = true;
                 }
             }
         });

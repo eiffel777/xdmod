@@ -89,17 +89,18 @@ class SummaryControllerProvider extends BaseControllerProvider
 
         foreach ($presetCharts as $index => $presetChart)
         {
-            /* The font size setting in the 'summary_charts' section was
-             * ignored and hard-coded to 2 in the code. Keep this behaviour
-             * for backwards compatibility
-             */
-            $presetChart['font_size'] = 2;
+            $presetChart['featured'] = true;
+            $presetChart['aggregation_unit'] = 'Auto';
+            $presetChart['timeframe_label'] = 'Previous month';
 
             list($chartLocation, $column) = $layout->getLocation('PC' . $index);
             $summaryPortlets[$chartLocation] = array(
                 'name' => 'PC' . $index,
                 'type' => 'ChartPortlet',
-                'config' => $presetChart,
+                'config' => array(
+                    'name' => 'summary_' . $index,
+                    'chart' => $presetChart
+                ),
                 'column' => $column
             );
         }
@@ -134,7 +135,10 @@ class SummaryControllerProvider extends BaseControllerProvider
                     $summaryPortlets[$chartLocation] = array(
                         'name' => $name,
                         'type' => 'ChartPortlet',
-                        'config' => $queryConfig,
+                        'config' => array(
+                            'name' => $query['name'],
+                            'chart' => $queryConfig
+                        ),
                         'column' => $column
                     );
                 }

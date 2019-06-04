@@ -458,13 +458,12 @@ $page_title = xd_utilities\getConfiguration('general', 'title');
 
     <?php /* Modules used by both XSEDE and Open XDMoD. */ ?>
 
-    <script type="text/javascript" src="gui/js/modules/NoviceUser.js"></script>
-    <?php
-    // Summary page portlets
-    foreach (glob('gui/js/modules/summary/[A-Z]*Portlet.js') as $filename) {
-        echo '<script type="text/javascript" src="' . $filename . '"></script>';
-    }
-    ?>
+    <?php if (isset($features['novice_user']) && filter_var($features['novice_user'], FILTER_VALIDATE_BOOLEAN)): ?>
+        <script type="text/javascript" src="gui/js/modules/NoviceUser.js"></script>
+    <?php else: ?>
+        <script type="text/javascript" src="gui/js/modules/Summary.js"></script>
+    <?php endif; ?>
+
     <script type="text/javascript" src="gui/js/modules/Usage.js"></script>
     <?php if ($userLoggedIn): ?>
         <script type="text/javascript" src="gui/js/modules/ReportGenerator.js"></script>
