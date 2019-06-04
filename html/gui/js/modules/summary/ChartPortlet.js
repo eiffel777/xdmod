@@ -14,17 +14,7 @@ XDMoD.Modules.SummaryPortlets.ChartPortlet = Ext.extend(Ext.ux.Portlet, {
         qtip: 'Edit in Metric Explorer',
         scope: this,
         handler: function (event, toolEl, panel) {
-<<<<<<< HEAD
-            var config = panel.config;
-            config.font_size = 3;
-            config.title = panel.title;
-            config.featured = true;
-            config.summary_index = (config.preset ? 'summary_' : '') + config.index;
-
-            XDMoD.Module.MetricExplorer.setConfig(config, config.summary_index, Boolean(config.preset));
-=======
             XDMoD.Module.MetricExplorer.setConfig(panel.config.chart, panel.config.name, false);
->>>>>>> 4e4fe8938cfd0bf6d5f1bb90180a7af194517843
         }
     }, {
         id: 'help'
@@ -33,19 +23,11 @@ XDMoD.Modules.SummaryPortlets.ChartPortlet = Ext.extend(Ext.ux.Portlet, {
     initComponent: function () {
         var self = this;
 
-<<<<<<< HEAD
-        this.title = this.config.title;
-=======
         this.title = this.config.chart.title;
->>>>>>> 4e4fe8938cfd0bf6d5f1bb90180a7af194517843
         if (this.title.length > 60) {
             this.title = this.title.substring(0, 57) + '...';
         }
 
-<<<<<<< HEAD
-        var highchartConfig = {};
-        jQuery.extend(true, highchartConfig, this.config);
-=======
         // Sync date ranges
         var dateRanges = CCR.xdmod.ui.DurationToolbar.getDateRanges();
 
@@ -60,7 +42,6 @@ XDMoD.Modules.SummaryPortlets.ChartPortlet = Ext.extend(Ext.ux.Portlet, {
 
         var highchartConfig = {};
         jQuery.extend(true, highchartConfig, this.config.chart);
->>>>>>> 4e4fe8938cfd0bf6d5f1bb90180a7af194517843
         highchartConfig.title = '';
 
         this.store = new CCR.xdmod.CustomJsonStore({
@@ -154,11 +135,7 @@ XDMoD.Modules.SummaryPortlets.ChartPortlet = Ext.extend(Ext.ux.Portlet, {
                 config: Ext.util.JSON.encode(highchartConfig),
                 format: 'hc_jsonstore',
                 public_user: CCR.xdmod.publicUser,
-<<<<<<< HEAD
-                aggregation_unit: this.config.aggregation_unit,
-=======
                 aggregation_unit: highchartConfig.aggregation_unit,
->>>>>>> 4e4fe8938cfd0bf6d5f1bb90180a7af194517843
                 width: this.width,
                 height: this.height
             }
