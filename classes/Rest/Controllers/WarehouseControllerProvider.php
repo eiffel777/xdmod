@@ -295,6 +295,8 @@ class WarehouseControllerProvider extends BaseControllerProvider
         $controller
             ->get("$root/datasets", "$current::getDatasets");
 
+        $controller->get("$root/aggregatedata", "$current::getAggregateData");
+
         $controller
             ->get("$root/plots/formats/output", "$current::getPlotOutputFormats");
 
@@ -699,6 +701,70 @@ class WarehouseControllerProvider extends BaseControllerProvider
             'success' => true,
             'results' => $realms,
         ));
+    }
+
+    /**
+     * Return aggregate data from the datawarehouse
+     *
+     * @param Request     $request The request used to make this call.
+     * @param Application $app     The router application.
+     *
+     * @return json object
+     */
+    public function getAggregateData(Request $request, Application $app)
+    {
+        $user = $this->authorize($request);
+
+        $json_config = $this->getStringParam($request, 'config', true);
+        $start = $this->getIntParam($request, 'start', true);
+        $limit = $this->getIntParam($request, 'limit', true);
+
+        $config = json_decode($json_config);
+
+        if ($config === null) {
+            throw new BadRequestException('syntax error in config parameter');
+        }
+
+        $mandatory = array('realm', 'group_by', 'statistics', 'aggregation_unit', 'start_date', 'end_date', 'order_by');
+        foreach ($mandatory as $required_property) {
+            if (!property_exists($config, $required_property)) {
+                throw new BadRequestException('Missing mandatory config property ' . $required_property);
+            }
+        }
+
+        $permittedStats = Acls::getPermittedStatistics($user, $config->realm, $config->group_by);
+        $forbiddenStats = array_diff($config->statistics, $permittedStats);
+
+        if (!empty($forbiddenStats) ) {
+            throw new AccessDeniedException('access denied to ' . json_encode($forbiddenStats));
+        }
+
+        $query_classname = '\DataWarehouse\Query\\' . $config->realm . '\Aggregate';
+        $query = new $query_classname($config->aggregation_unit, $config->start_date, $config->end_date, $config->group_by);
+
+        $allRoles = $user->getAllRoles();
+        $query->setMultipleRoleParameters($allRoles, $user);
+
+        foreach ($config->statistics as $stat) {
+            $query->addStat($stat);
+        }
+
+        if (!property_exists($config->order_by, 'field') || !property_exists($config->order_by, 'dirn')) {
+            throw new BadRequestException('Malformed config property order_by');
+        }
+        $dirn = $config->order_by->dirn === 'asc' ? 'ASC' : 'DESC';
+
+        $query->addOrderBy($config->order_by->field, $dirn);
+
+        $dataset = new \DataWarehouse\Data\SimpleDataset($query);
+
+        return $app->json(
+            array(
+                'results' => $dataset->getResults($limit, $start),
+                'total' => $dataset->getTotalPossibleCount(),
+                'success' => true
+            )
+        );
     }
 
     /**
@@ -1161,22 +1227,25 @@ class WarehouseControllerProvider extends BaseControllerProvider
     {
         $queryDescripters = Acls::getQueryDescripters($user, $realm);
 
+        if (empty($queryDescripters)) {
+            throw new BadRequestException('Invalid realm');
+        }
+
         $offset = $this->getIntParam($request, 'start', true);
         $limit = $this->getIntParam($request, 'limit', true);
 
-        $allowableDimensions = array_keys($queryDescripters);
+        $searchParameterStr = $this->getStringParam($request, 'params', true);
 
-        $params = $this->parseRestArguments($request, $allowableDimensions, false, 'params');
+        $searchParams = json_decode($searchParameterStr, true);
 
-        if (count($params) < 1) {
-            $results = $app->json(
-                array(
-                    'success' => false,
-                    'action' => $action,
-                    'message' => 'Must provide at least one additional parameter to submit a search request.'
-                ),
-                400
-            );
+        if ($searchParams === null || !is_array($searchParams)) {
+            throw new BadRequestException('The params parameter must be a json object');
+        }
+
+        $params = array_intersect_key($searchParams, $queryDescripters);
+
+        if (count($params) != count($searchParams)) {
+            throw new BadRequestException('Invalid search parameters specified in params object');
         } else {
             $QueryClass = "\\DataWarehouse\\Query\\$realm\\RawData";
             $query = new $QueryClass("day", $startDate, $endDate, null, "", array(), 'tg_usage', array(), false);
@@ -1184,7 +1253,9 @@ class WarehouseControllerProvider extends BaseControllerProvider
             $allRoles = $user->getAllRoles();
             $query->setMultipleRoleParameters($allRoles, $user);
 
-            $query->setRoleParameters($params);
+            if (!empty($params)) {
+                $query->setRoleParameters($params);
+            }
 
             $dataSet = new \DataWarehouse\Data\SimpleDataset($query);
             $raw = $dataSet->getResults($limit, $offset);
@@ -1219,7 +1290,7 @@ class WarehouseControllerProvider extends BaseControllerProvider
                 $privQuery = new $QueryClass("day", $startDate, $endDate, null, "", array(), "tg_usage", array(), false);
                 $privQuery->setRoleParameters($params);
 
-                $privDataSet = new \DataWarehouse\Data\SimpleDataset($privQuery);
+                $privDataSet = new \DataWarehouse\Data\SimpleDataset($privQuery, 1, 0);
                 $privResults = $privDataSet->getResults();
                 if (count($privResults) != 0) {
                     $results = $app->json(

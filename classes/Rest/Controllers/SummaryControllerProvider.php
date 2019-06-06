@@ -24,9 +24,6 @@ class SummaryControllerProvider extends BaseControllerProvider
 
         $controller->post("$root/layout", "$class::setLayout");
         $controller->delete("$root/layout", "$class::resetLayout");
-
-        $controller->post("$root/viewedUserTour", "$class::setViewedUserTour");
-        $controller->get("$root/viewedUserTour", "$class::getViewedUserTour");
     }
 
     /*
@@ -89,17 +86,18 @@ class SummaryControllerProvider extends BaseControllerProvider
 
         foreach ($presetCharts as $index => $presetChart)
         {
-            /* The font size setting in the 'summary_charts' section was
-             * ignored and hard-coded to 2 in the code. Keep this behaviour
-             * for backwards compatibility
-             */
-            $presetChart['font_size'] = 2;
+            $presetChart['featured'] = true;
+            $presetChart['aggregation_unit'] = 'Auto';
+            $presetChart['timeframe_label'] = 'Previous month';
 
             list($chartLocation, $column) = $layout->getLocation('PC' . $index);
             $summaryPortlets[$chartLocation] = array(
                 'name' => 'PC' . $index,
                 'type' => 'ChartPortlet',
-                'config' => $presetChart,
+                'config' => array(
+                    'name' => 'summary_' . $index,
+                    'chart' => $presetChart
+                ),
                 'column' => $column
             );
         }
@@ -134,7 +132,10 @@ class SummaryControllerProvider extends BaseControllerProvider
                     $summaryPortlets[$chartLocation] = array(
                         'name' => $name,
                         'type' => 'ChartPortlet',
-                        'config' => $queryConfig,
+                        'config' => array(
+                            'name' => $query['name'],
+                            'chart' => $queryConfig
+                        ),
                         'column' => $column
                     );
                 }
@@ -189,43 +190,6 @@ class SummaryControllerProvider extends BaseControllerProvider
         return $app->json(array(
             'success' => true,
             'total' => 1
-        ));
-    }
-
-    /**
-     * Set value for if a user should view the help tour or not
-     */
-    public function setViewedUserTour(Request $request, Application $app)
-    {
-        $user = $this->authorize($request);
-
-        $content = json_decode($this->getStringParam($request, 'data', true), true);
-
-        if ($content === null || !isset($content['viewedTour'])) {
-            throw new BadRequestException('Invalid data parameter');
-        }
-
-        $storage = new \UserStorage($user, 'viewed_user_tour');
-
-        return $app->json(array(
-            'success' => true,
-            'total' => 1,
-            'msg' => $storage->upsert(0, $content)
-        ));
-    }
-
-    /**
-     * Get stored value for if a user should view the help tour or not
-     */
-    public function getViewedUserTour(Request $request, Application $app)
-    {
-        $user = $this->authorize($request);
-        $storage = new \UserStorage($user, 'viewed_user_tour');
-
-        return $app->json(array(
-            'success' => true,
-            'total' => 1,
-            'data' => $storage->get()
         ));
     }
 }

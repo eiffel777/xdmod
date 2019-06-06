@@ -14,13 +14,7 @@ XDMoD.Modules.SummaryPortlets.ChartPortlet = Ext.extend(Ext.ux.Portlet, {
         qtip: 'Edit in Metric Explorer',
         scope: this,
         handler: function (event, toolEl, panel) {
-            var config = panel.config;
-            config.font_size = 3;
-            config.title = panel.title;
-            config.featured = true;
-            config.summary_index = (config.preset ? 'summary_' : '') + config.index;
-
-            XDMoD.Module.MetricExplorer.setConfig(config, config.summary_index, Boolean(config.preset));
+            XDMoD.Module.MetricExplorer.setConfig(panel.config.chart, panel.config.name, false);
         }
     }, {
         id: 'help'
@@ -29,13 +23,25 @@ XDMoD.Modules.SummaryPortlets.ChartPortlet = Ext.extend(Ext.ux.Portlet, {
     initComponent: function () {
         var self = this;
 
-        this.title = this.config.title;
+        this.title = this.config.chart.title;
         if (this.title.length > 60) {
             this.title = this.title.substring(0, 57) + '...';
         }
 
+        // Sync date ranges
+        var dateRanges = CCR.xdmod.ui.DurationToolbar.getDateRanges();
+
+        var date = dateRanges.find(function (element) {
+            return element.text === this.config.chart.timeframe_label;
+        }, this);
+
+        if (date) {
+            this.config.chart.start_date = date.start.format('Y-m-d');
+            this.config.chart.end_date = date.end.format('Y-m-d');
+        }
+
         var highchartConfig = {};
-        jQuery.extend(true, highchartConfig, this.config);
+        jQuery.extend(true, highchartConfig, this.config.chart);
         highchartConfig.title = '';
 
         this.store = new CCR.xdmod.CustomJsonStore({
@@ -129,7 +135,7 @@ XDMoD.Modules.SummaryPortlets.ChartPortlet = Ext.extend(Ext.ux.Portlet, {
                 config: Ext.util.JSON.encode(highchartConfig),
                 format: 'hc_jsonstore',
                 public_user: CCR.xdmod.publicUser,
-                aggregation_unit: this.config.aggregation_unit,
+                aggregation_unit: highchartConfig.aggregation_unit,
                 width: this.width,
                 height: this.height
             }
