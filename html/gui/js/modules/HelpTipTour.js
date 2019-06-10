@@ -100,7 +100,7 @@ Ext.ux.HelpTipTour = Ext.extend(Ext.Component, {
     },
 
     nextButtonCallback: function(){
-        var tip_to_show = (this.tip_index < this.items.length - 1) ?  this.tip_index + 1 : this.items.length - 1;
+        var tip_to_show = (this.tip_index < this.items.length - 1) ? this.tip_index + 1 : this.items.length - 1;
         this.current_tip.hideTip();
         this.showTip(tip_to_show);
     },

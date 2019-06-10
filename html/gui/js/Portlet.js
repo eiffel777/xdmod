@@ -4,6 +4,9 @@ CCR.xdmod.ui.Portlet = Ext.extend(Ext.ux.Portlet, {
     initComponent: function() {
         this.makeHelpTour();
         this.setHelpTourStart();
+        if(this.tools === undefined){
+            this.tools = [];
+        }
         this.tools.push({
           id: 'helpTour',
           qtip: 'View Help Tour',
