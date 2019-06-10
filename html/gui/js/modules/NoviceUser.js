@@ -27,7 +27,6 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
 
                     var portletWidth = 600;
                     var portalColumns = this.reader.jsonData.portalConfig.columns;
-                    var userTour = self.createNewUserTour();
 
                     var portal = new Ext.ux.Portal({
                         items: [],

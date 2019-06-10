@@ -135,7 +135,11 @@ XDMoD.Modules.SummaryPortlets.ChartPortlet = Ext.extend(Ext.ux.Portlet, {
                 config: Ext.util.JSON.encode(highchartConfig),
                 format: 'hc_jsonstore',
                 public_user: CCR.xdmod.publicUser,
+<<<<<<< HEAD
                 aggregation_unit: highchartConfig.aggregation_unit,
+=======
+                aggregation_unit: this.config.aggregation_unit,
+>>>>>>> 3498521... Initial Prototype of Novice User Portal
                 width: this.width,
                 height: this.height
             }

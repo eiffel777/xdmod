@@ -18,7 +18,6 @@ Ext.ux.HelpTip = Ext.extend(Ext.Tip, {
     cls: 'help-tip',
     bodyCssClass: 'help-tip-body',
     baseCls: 'base-help-tip',
-    bodyStyle: {'background-color': '#E9F3FF', 'padding': '5px', 'border': '1px solid #bbb'},
     spotlight: null,
     bbar: [],
     autoHide: false,
@@ -102,8 +101,6 @@ Ext.ux.HelpTip = Ext.extend(Ext.Tip, {
             this.render(Ext.getBody());
         }
 
-        this.showAt([-1000,-1000]);
-
         var alignmentOffsets = {
             'bl': [0, -7],
             'tl': [-10, 7],
@@ -121,7 +118,16 @@ Ext.ux.HelpTip = Ext.extend(Ext.Tip, {
 
         this.createSpotlight();
         this.spotlight.show(el);
+
+        // Help tips are aligned to the specified target element relative to specific
+        // anchor points. In order to correctly anchor the help tip, the help tip must
+        // has a height and width which it does not have until iti si rendered on the
+        // page. The help tip is first shown off the screen with the statement below so
+        // it has a height and width and then the showAt() function is called again
+        // to show it in the correct location relative to its target element.
+        this.showAt([-1000,-1000]);
         this.showAt(this.el.getAlignToXY(el, this.position, offset));
+
         this.syncAnchor();
     },
 
