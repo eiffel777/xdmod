@@ -1,12 +1,21 @@
+/**
+ * @class CCR.xdmod.ui.Portlet
+ * @extends Ext.us.Portlet
+ * @author: Greg Dean
+ *
+ * Creates a new portlet that includes a help tour tips are added to the helpTourDetails
+ * property
+ */
 CCR.xdmod.ui.Portlet = Ext.extend(Ext.ux.Portlet, {
     helpTour: null,
     helpTourDetails: [],
     initComponent: function() {
         this.makeHelpTour();
-        this.setHelpTourStart();
+
         if(this.tools === undefined){
             this.tools = [];
         }
+
         this.tools.push({
           id: 'helpTour',
           qtip: 'View Help Tour',
@@ -36,18 +45,5 @@ CCR.xdmod.ui.Portlet = Ext.extend(Ext.ux.Portlet, {
                 self.helpTour.items.push(tip);
             });
         }
-    },
-    setHelpTourStart: function() {
-        var self = this;
-
-        if (self.helpTourDetails.startAt !== undefined) {
-            new Ext.util.DelayedTask(function(){
-              var target = Ext.select(self.helpTourDetails.startAt);
-              target.on('click', self.helpTipStartCallback, self);
-            }).delay(10);
-        }
-    },
-    helpTipStartCallback: function() {
-        this.helpTour.startTour();
     }
 })
