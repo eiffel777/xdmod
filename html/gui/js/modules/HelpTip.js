@@ -98,7 +98,7 @@ Ext.ux.HelpTip = Ext.extend(Ext.Tip, {
 
     showBy : function(el){
         if(!this.rendered){
-            this.render(Ext.getBody());
+           this.render(Ext.getBody());
         }
 
         var alignmentOffsets = {
