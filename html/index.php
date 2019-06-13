@@ -142,6 +142,7 @@ $page_title = xd_utilities\getConfiguration('general', 'title');
     </script>
 
     <link rel="stylesheet" type="text/css" href="gui/css/viewer.css">
+    <link rel="stylesheet" type="text/css" href="gui/css/helptour.css">
 
     <?php if ($userLoggedIn): ?>
         <script type="text/javascript" src="gui/lib/RowExpander.js"></script>
@@ -437,7 +438,7 @@ $page_title = xd_utilities\getConfiguration('general', 'title');
     <script type="text/javascript" src="gui/lib/extjs/examples/ux/DataView-more.js"></script>
     <script type="text/javascript" src="gui/lib/extjs/examples/ux/Spotlight.js"></script>
     <script type="text/javascript" src="gui/js/FilterDimensionPanel.js"></script>
-
+    <script type="text/javascript" src="gui/lib/extjs/examples/ux/Spotlight.js"></script>
     <?php if ($userLoggedIn): ?>
         <script type="text/javascript" src="gui/js/CustomMenu.js"></script>
         <script type="text/javascript" src="gui/js/AddDataPanel.js"></script>
