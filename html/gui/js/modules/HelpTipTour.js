@@ -1,27 +1,51 @@
 /**
  * @class Ext.ux.HelpTipTour
- * @extends Ext.Component
+ * @extends Ext.Container
  * @author: Greg Dean
  *
- * Creates a new component called HelpTipTour which takes a set of provided Ext.ux.HelpTip components
- * and shows them in the order they are in the items elememt for this component. Previous, Next and End
- * Tour buttons are automatically added in the Ext.ux.HelpTip bbar if no buttons exist.
+ * Creates a new component called HelpTipTour which takes a set of json objects and makes
+ * them into Ext.ux.HelpTip components and shows them in the order they are in the items
+ * elememt for this component. Previous, Next and End Tour buttons are automatically added
+ * in the Ext.ux.HelpTip bbar if no buttons exist.
  *
  * var helpTipTour = new Ext.ux.HelpTipTour({
  *   title: "Title for Help Tips",
- *   items: [helpTip1, helpTip2, helpTip3]
+ *   items: [{
+ *              html: `Some more html`,
+ *              target: "#another .css-selector",
+ *              position: "tl-bl",
+ *              maxWidth: 400,
+ *              offset: [20, 0]
+ *            },
+ *            {
+ *              html: `And yet more html`,
+ *              target: ".css-selector:first",
+ *              position: "l-r"
+ *            },
+ *            {
+ *              html: `Thank you for viewing this help tour`,
+ *              target: "#selector",
+ *              position: "t-t",
+ *              listeners: {
+ *                  show: function(){
+ *                    console.log("HelpTip have all the listeners that a Ext.Tip has");
+ *                  }
+ *              }
+ *            }
+ *    ]
  * });
  */
-Ext.ux.HelpTipTour = Ext.extend(Ext.Component, {
+Ext.ux.HelpTipTour = Ext.extend(Ext.Container, {
     tip_index: null,
     current_tip: null,
     title: 'XDMoD Help Tips',
+    defaultType: 'helptip',
     initComponent: function () {
         Ext.ux.HelpTipTour.superclass.initComponent.call(this);
     },
 
     getTip: function (tip_index) {
-        return this.items[tip_index];
+        return this.items.items[tip_index];
     },
 
     startTour: function () {
@@ -37,7 +61,7 @@ Ext.ux.HelpTipTour = Ext.extend(Ext.Component, {
 
         this.tip_index = tip_index;
         this.current_tip = this.getTip(this.tip_index);
-        var target_element = Ext.select(this.current_tip.target);
+        var target_element = Ext.query(this.current_tip.target);
 
         if (this.current_tip.title === undefined) {
             this.current_tip.title = this.title;
@@ -50,7 +74,7 @@ Ext.ux.HelpTipTour = Ext.extend(Ext.Component, {
             cls: 'next-help-tip',
             overCls: 'help-tip-button',
             listeners: {
-                click: function() {
+                click: function () {
                     var tip_to_show = (self.tip_index < self.items.length - 1) ? self.tip_index + 1 : self.items.length - 1;
                     self.current_tip.hideTip();
                     self.showTip(tip_to_show);
@@ -63,7 +87,7 @@ Ext.ux.HelpTipTour = Ext.extend(Ext.Component, {
             cls: 'previous-help-tip',
             overCls: 'help-tip-button',
             listeners: {
-                click: function() {
+                click: function () {
                     var tip_to_show = (self.tip_index > 0) ? self.tip_index - 1 : 0;
                     self.current_tip.hideTip();
                     self.showTip(tip_to_show);

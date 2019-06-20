@@ -16,6 +16,7 @@
 Ext.ux.HelpTip = Ext.extend(Ext.Tip, {
 
     cls: 'help-tip',
+    xtype: 'helptip',
     bodyCssClass: 'help-tip-body',
     baseCls: 'base-help-tip',
     spotlight: null,
@@ -113,7 +114,7 @@ Ext.ux.HelpTip = Ext.extend(Ext.Tip, {
             r: [-7, 0]
         };
 
-        var offset = alignmentOffsets[this.tipAnchorPos].map( function(v, k) {
+        var offset = alignmentOffsets[this.tipAnchorPos].map(function (v, k) {
             return v + this.offset[k];
         }, this);
 
@@ -145,3 +146,5 @@ Ext.ux.HelpTip = Ext.extend(Ext.Tip, {
         }
     }
 });
+
+Ext.reg('helptip', Ext.ux.HelpTip);
