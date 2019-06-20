@@ -229,15 +229,15 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
         var userTour = new Ext.ux.HelpTipTour({
             title: 'New User Tour',
             items: [
-              new Ext.ux.HelpTip({
+              {
                   html: `Welcome to Open XDMoD! Open XDMoD is an open source tool to facilitate the management of
                          high performance computing resources. <br /><br />Open XDMoD’s management capabilities
                          include monitoring standard metrics such as utilization, providing quality of service
                          metrics designed to proactively identify underperforming system hardware and software.`,
                   target: "#tg_summary",
                   position: "t-t"
-              }),
-              new Ext.ux.HelpTip({
+              },
+              {
                   html: `The XDMoD User Interface contains a wealth of information and has been organized into tabs
                          to compartmentalize the data.<ul>
                          <li>
@@ -263,31 +263,31 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                   position: "tl-bl",
                   maxWidth: 400,
                   offset: [20, 0]
-              }),
-              new Ext.ux.HelpTip({
+              },
+              {
                   html: `Your are currently on the Summary tab which provides a snapshot overview of selected
                          data with several small summary charts. These charts display information such as the
                          number of jobs run, average CPU time per job, and the average number of processors per
                          job.`,
                   target: "#tg_summary",
                   position: "t-t"
-              }),
-              new Ext.ux.HelpTip({
+              },
+              {
                   html: `The Summary tab is made up of several informational boxes called portlets. Each portlet
                          contains summary statistics, selected charts or other pieces of information that are
                          useful to the role of the current user.`,
                   target: ".x-portlet:first",
                   position: "l-r"
-              }),
-              new Ext.ux.HelpTip({
+              },
+              {
                   html: `From left to right, this toolbar provides a button for collapsing the portlet, a button
                          to configure information in the portlet, and a button that when hovered over will present
                          a tooltip to describe the the information in the portlet.`,
                   target: ".x-portlet:first .x-panel-header:first",
                   position: 'tl-br',
                   offset: [-10, 0]
-              }),
-              new Ext.ux.HelpTip({
+              },
+              {
                   html: `The Help button is located in the upper right corner of the screen and clicking on it
                          will provide you with the following options: User Manual, FAQ and YouTube
                          Channel.<br /><br />Clicking on User Manual will direct the user to the XDMoD User Manual.
@@ -296,16 +296,16 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                          will take you to a page containing Frequently Asked Questions.`,
                   target: "#help_button",
                   position: "tr-bl"
-              }),
-              new Ext.ux.HelpTip({
+              },
+              {
                   html: `The My Profile button allows you to view and update general settings pertaining to your
                          account. Your current role will be displayed in the title bar of the My Profile window.
                          <br /><br />Information you can update includes data such as your First Name, Last Name,
                          Email Address and Password.`,
                   target: "#global-toolbar-profile",
                   position: "tl-bl",
-              }),
-              new Ext.ux.HelpTip({
+              },
+              {
                   html: `Thank you for viewing the XDMoD User Tour. If you want to view this tour again you can
                          find it by clicking on the Help button in the upper right corner.`,
                   target: "#tg_summary",
@@ -326,7 +326,7 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                         }); //conn.request
                       }
                   }
-              })
+              }
             ]
         });
 
