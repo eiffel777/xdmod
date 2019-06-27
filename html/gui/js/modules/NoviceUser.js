@@ -201,30 +201,6 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
         XDMoD.Module.Summary.superclass.initComponent.apply(this, arguments);
     },
 
-    newUserTourCallback: function(buttonValue, inputText, showConfig){
-        var newUserTourCheckbox = Ext.select('#new-user-tour-checkbox');
-        if(buttonValue === 'yes'){
-            this.createNewUserTour();
-        }
-        else if(buttonValue === 'no' && newUserTourCheckbox.elements[0].checked === true ){
-            var conn = new Ext.data.Connection();
-            conn.request({
-                url: XDMoD.REST.url+'/summary/viewedUserTour',
-                params: {
-                    data: Ext.encode({
-                      viewedTour: 1,
-                      uid: CCR.xdmod.ui.mappedPID,
-                      token: XDMoD.REST.token
-                    })
-                },
-                method: 'POST',
-                callback: function(options, success, response) {
-                    Ext.Msg.alert('Status', 'This message will not be displayed again. Welcome to XDMoD');
-                } //callback
-            }); //conn.request
-        }
-    },
-
     createNewUserTour: function(){
         var userTour = new Ext.ux.HelpTipTour({
             title: 'New User Tour',
@@ -340,7 +316,5 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                 })
             });
         }
-
-        return userTour;
     }
 });
