@@ -134,14 +134,14 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                             method: 'GET',
                             callback: function(options, success, response) {
                                 var resp = Ext.decode(response.responseText);
-                                if(resp.data.length == 0 || !resp.data[0].viewedTour){
+                                if (resp.data.length == 0 || !resp.data[0].viewedTour) {
                                     Ext.Msg.show({
                                         cls: 'new-user-tour-dialog-container',
                                         title: "New User Tour",
                                         msg: "Welcome to XDMoD. It seems that you haven't viewed our User Tour yet. The User Tour is a short series of information tips giving an overview of some basic components of XDMoD. If you want to view the tour now click Yes below.<br /><br /><input type='checkbox' id='new-user-tour-checkbox' /> Please don't show me this again.",
                                         buttons: Ext.Msg.YESNO,
                                         icon: Ext.Msg.INFO,
-                                        fn: function(buttonValue, inputText, showConfig){
+                                        fn: function (buttonValue, inputText, showConfig) {
                                             var newUserTourCheckbox = Ext.select('#new-user-tour-checkbox');
                                             if (buttonValue === 'yes') {
                                                 userTour.startTour();
@@ -157,7 +157,7 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                                                         })
                                                     },
                                                     method: 'POST',
-                                                    callback: function(options, success, response) {
+                                                    callback: function (options, success, response) {
                                                         Ext.Msg.alert('Status', 'This message will not be displayed again. If you wish to view the User Tour in the future a link to it can be found by clicking the Help button in the upper right corner of the page.');
                                                     } //callback
                                                 }); //conn.request
@@ -201,7 +201,7 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
         XDMoD.Module.Summary.superclass.initComponent.apply(this, arguments);
     },
 
-    createNewUserTour: function(){
+    createNewUserTour: function () {
         var userTour = new Ext.ux.HelpTipTour({
             title: 'New User Tour',
             items: [
@@ -287,7 +287,7 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                   target: "#tg_summary",
                   position: "t-t",
                   listeners: {
-                      show: function(){
+                      show: function () {
                         var conn = new Ext.data.Connection();
                         conn.request({
                             url: XDMoD.REST.url+'/summary/viewedUserTour',
@@ -307,10 +307,10 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
         });
 
         if (CCR.xdmod.publicUser !== true) {
-            Ext.get('help_button').on('click', function(){
-                Ext.get('global-toolbar-help-new-user-tour').on('click', function(){
+            Ext.get('help_button').on('click', function () {
+                Ext.get('global-toolbar-help-new-user-tour').on('click', function () {
                     Ext.History.add('main_tab_panel:tg_summary');
-                    new Ext.util.DelayedTask(function(){
+                    new Ext.util.DelayedTask(function () {
                        userTour.startTour();
                     }).delay(10);
                 })
