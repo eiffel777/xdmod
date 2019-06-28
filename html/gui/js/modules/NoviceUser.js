@@ -27,7 +27,6 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
 
                     var portletWidth = 600;
                     var portalColumns = this.reader.jsonData.portalConfig.columns;
-                    var userTour = self.createNewUserTour();
 
                     var portal = new Ext.ux.Portal({
                         items: [],
@@ -121,6 +120,7 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                     portalwindow.doLayout();
 
                     if(CCR.xdmod.publicUser !== true){
+                        var userTour = self.createNewUserTour();
                         var conn = new Ext.data.Connection();
 
                         conn.request({
@@ -316,5 +316,7 @@ Ext.extend(XDMoD.Module.Summary, XDMoD.PortalModule, {
                 })
             });
         }
+
+        return userTour;
     }
 });
