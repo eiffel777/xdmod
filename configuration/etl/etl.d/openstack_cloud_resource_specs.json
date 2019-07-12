@@ -1,0 +1,67 @@
+{
+    "module": "xdmod",
+    "defaults": {
+        "global": {
+            "endpoints": {
+                "source": {
+                    "type" : "mysql",
+                    "name" : "Cloud DB",
+                    "config" : "datawarehouse",
+                    "schema": "modw_cloud",
+                    "create_schema_if_not_exists": "true"
+                },
+                "destination": {
+                    "type" : "mysql",
+                    "name" : "Cloud DB",
+                    "config" : "datawarehouse",
+                    "schema": "modw_cloud",
+                    "create_schema_if_not_exists": "true"
+                }
+            }
+        },
+        "jobs-cloud-ingest-openstack": {
+            "namespace": "ETL\\Ingestor",
+            "options_class": "IngestorOptions",
+            "truncate_destination": false
+        }
+    },
+
+    "jobs-cloud-ingest-openstack": [
+        {
+            "name": "OpenStackRawCloudEventIngestor",
+            "description": "Loading Open Stack data",
+            "class": "StructuredFileIngestor",
+            "definition_file": "cloud_openstack/resource_specs.json",
+            "endpoints": {
+                "source": {
+                    "type": "directoryscanner",
+                    "name": "Open Stack event logs",
+                    "path": "${CLOUD_EVENT_LOG_DIRECTORY}",
+                    "file_pattern": "/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}_[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}.json/",
+                    "#": "Recursion depth is relative to the path",
+                    "recursion_depth": 1,
+                    "handler": {
+                        "type": "jsonfile",
+                        "record_separator": "\n",
+                        "record_schema_path": "cloud_openstack/resource_specs.schema.json",
+                        "field_names": [
+                            "host",
+                            "memory_mb",
+                            "cpus",
+                            "ts",
+                            "resource_id",
+                        ],
+                        "filters": [{
+                          "#": "Open Stack records do not contain a record_type field so we determine it by looking at the",
+                          "#": "event type of a record.",
+                          "type": "external",
+                          "name": "jq",
+                          "path": "jq",
+                          "arguments" :"-c '.[] | .[\"record_type\"] += if .[\"event_type\"] == \"compute.instance.exists\" then \"ADMINISTRATIVE\" else \"ACCOUNTING\" end'"
+                        }]
+                    }
+                }
+            }
+        }
+    ]
+}

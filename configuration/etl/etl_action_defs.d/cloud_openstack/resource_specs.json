@@ -1,0 +1,22 @@
+{
+    "#": "Load raw event data from OpenStack log files. The resource id will be",
+    "#": "specified on the ETL command line at run time.",
+
+    "table_definition": [
+        {
+            "$ref": "${table_definition_dir}/cloud_openstack/resource_specs.json#/table_definition"
+        },
+    ],
+
+    "#": "Note that JSON pointers are used below to access data in nested JSON objects",
+
+    "destination_record_map": {
+        "openstack_resource_specs": {
+            "host": "hypervisor_hostname",
+            "memory_mb": "memory_mb",
+            "vcpus": "vcpus",
+            "ts": "ts",
+            "resource_id": "${RESOURCE_ID}",
+        }
+    }
+}

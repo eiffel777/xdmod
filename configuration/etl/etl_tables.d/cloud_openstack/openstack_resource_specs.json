@@ -1,0 +1,49 @@
+{
+    "#": "Maps Open Stack events types to existing list of events types in event_type table",
+
+    "table_definition": {
+        "name": "openstack_resource_specs",
+        "engine": "MyISAM",
+        "comment": "Maps Open Stack events to list of defined events in event_type table",
+        "columns": [
+            {
+                "name": "hostname",
+                "type": "int(11)",
+                "nullable": false,
+                "comment": "Unknown = -1 for global dimensions"
+            },
+            {
+                "name": "memory_mb",
+                "type": "int(11)",
+                "nullable": false,
+                "comment": "Unknown = -1 for global dimensions"
+            },
+            {
+                "name": "vcpus",
+                "type": "int(11)",
+                "nullable": false,
+                "comment": "Unknown = -1 for global dimensions"
+            },
+            {
+                "name": "start_time",
+                "type": "int(11)",
+                "nullable": false,
+                "comment": "Unknown = -1 for global dimensions"
+            },
+            {
+                "name": "resource_id",
+                "type": "int(11)",
+                "nullable": false
+            }
+        ],
+        "indexes": [
+            {
+                "name": "resource_id",
+                "columns": [
+                    "resource_id"
+                ],
+                "is_unique": false
+            }
+        ]
+    }
+}
