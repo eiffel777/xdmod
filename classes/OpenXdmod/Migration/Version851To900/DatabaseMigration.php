@@ -93,6 +93,19 @@ EOT
         }
 
         if (\CCR\DB\MySQLHelper::DatabaseExists($dbh->_db_host, $dbh->_db_port, $dbh->_db_username, $dbh->_db_password, 'modw_cloud')) {
+
+            $lastModifiedStartDate = DB::factory('hpcdb')->query('SELECT NOW() AS now FROM dual')[0]['now'];
+            Utilities::runEtlPipeline(
+                ['cloud-migration-8_5_1-9_0_0'],
+                $this->logger,
+                [
+                    'last-modified-start-date' => $lastModifiedStartDate
+                ]
+            );
+            $builder = new FilterListBuilder();
+            $builder->setLogger($this->logger);
+            $builder->buildRealmLists('Cloud');
+
             $sql = "SELECT
                       r.name,
                       sr.start_time,
