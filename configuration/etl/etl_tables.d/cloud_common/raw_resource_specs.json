@@ -32,7 +32,7 @@
             },
             {
                 "name": "fact_date",
-                "type": "datetime",
+                "type": "char(26)",
                 "nullable": false
             }
         ],

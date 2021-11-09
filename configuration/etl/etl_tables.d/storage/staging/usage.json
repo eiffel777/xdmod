@@ -36,7 +36,7 @@
             },
             {
                 "name": "dt",
-                "type": "datetime",
+                "type": "char(26)",
                 "nullable": false,
                 "comment": "Date and time usage data was collected"
             },
