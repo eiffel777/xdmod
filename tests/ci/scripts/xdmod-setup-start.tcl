@@ -15,6 +15,8 @@ set timeout 240
 spawn "xdmod-setup"
 
 provideInput {Do you want to continue (yes, no)?} yes
+
+provideInput {Do you want to continue (yes, no)?} yes
 selectMenuOption 1
 answerQuestion {Site Address} https://localhost/
 provideInput {Email Address:} xdmod@example.com

@@ -29,6 +29,8 @@ source [file join [file dirname [info script]] helper-functions.tcl]
 set timeout 240
 spawn "xdmod-setup"
 
+provideInput {Do you want to continue (yes, no)?} yes
+
 # Enter config settings for each resource
 selectMenuOption 4
 foreach resource $resources {
