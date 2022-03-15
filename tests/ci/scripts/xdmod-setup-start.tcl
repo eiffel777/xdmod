@@ -14,7 +14,7 @@ source [file join [file dirname [info script]] helper-functions.tcl]
 set timeout 240
 spawn "xdmod-setup"
 
-answerQuestion {Do you want to continue (yes, no)?} yes
+provideInput {Do you want to continue (yes, no)?} yes
 selectMenuOption 1
 answerQuestion {Site Address} https://localhost/
 provideInput {Email Address:} xdmod@example.com
