@@ -107,17 +107,6 @@
 
         "where": [
             "NOT (state != 'active' AND event_type = 'compute.instance.exists')"
-        ],
-
-        "groupby": [
-            "raw.resource_id",
-            "i.instance_id",
-            "raw.event_time_utc",
-            "etype.event_type_id",
-            "rtype.record_type_id",
-            "acct.account_id",
-            "sa.person_id",
-            "h.host_id"
         ]
     }
 }
