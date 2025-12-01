@@ -88,6 +88,14 @@ class DataWarehouseInitializer
     protected $enabledRealms = null;
 
     /**
+     * Determines if when building the filters list the list should be appended
+     * or truncated a recreated
+     * 
+     * @var bool
+     */
+    protected $appendFiltersList = false;
+
+    /**
      * @param iDatabase $hpcdbDb The HPcDB database.
      * @param iDatabase $warehouseDb The MoD warehouse database.
      */
@@ -382,6 +390,9 @@ class DataWarehouseInitializer
 
         $filterListBuilder = new FilterListBuilder();
         $filterListBuilder->setLogger($this->logger);
+        if($this->appendFiltersList) {
+            $filterListBuilder->setLastModifiedStartDate($lastModifiedStartDate);
+        }
         $filterListBuilder->buildRealmLists('Cloud');
     }
 
@@ -402,6 +413,9 @@ class DataWarehouseInitializer
 
         $filterListBuilder = new FilterListBuilder();
         $filterListBuilder->setLogger($this->logger);
+        if($this->appendFiltersList) {
+            $filterListBuilder->setLastModifiedStartDate($lastModifiedStartDate);
+        }
         $filterListBuilder->buildRealmLists('ResourceSpecifications');
     }
 
@@ -428,6 +442,9 @@ class DataWarehouseInitializer
         );
         $filterListBuilder = new FilterListBuilder();
         $filterListBuilder->setLogger($this->logger);
+        if($this->appendFiltersList) {
+            $filterListBuilder->setLastModifiedStartDate($lastModifiedStartDate);
+        }
         $filterListBuilder->buildRealmLists('Storage');
     }
 
@@ -470,6 +487,9 @@ class DataWarehouseInitializer
 
         $filterListBuilder = new FilterListBuilder();
         $filterListBuilder->setLogger($this->logger);
+        if($this->appendFiltersList) {
+            $filterListBuilder->setLastModifiedStartDate($lastModifiedStartDate);
+        }
         $filterListBuilder->buildRealmLists('Jobs');
     }
 
@@ -563,5 +583,10 @@ class DataWarehouseInitializer
         $this->enabledRealms = array_unique($realms);
 
         return $this->enabledRealms;
+    }
+
+    public function setAppendFiltersList(bool $appendFiltersList)
+    {
+        $this->appendFiltersList = $appendFiltersList;
     }
 }
