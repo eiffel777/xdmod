@@ -155,7 +155,7 @@ then
     last_modified_start_date_update_filter_list=$(date +'%F %T')
     sudo -u xdmod xdmod-shredder -r 'robertson' -f slurm -i $REF_DIR/robertson-filter-log/robertson-filter-test.log
     sudo -u xdmod xdmod-ingestor --start-date "2016-12-01" --end-date "2022-01-01" --last-modified-start-date "2017-01-01 00:00:00"
-    sudo -u xdmod xdmod-build-filter-lists -r Jobs --last-modified-start-date "$last_modified_start_date_update_filter_list"
+    sudo -u xdmod xdmod-build-filter-lists -r Jobs --append
 
     php $BASEDIR/scripts/create_xdmod_users.php
 
@@ -186,7 +186,7 @@ then
     last_modified_start_date_update_filter_list=$(date +'%F %T')
     sudo -u xdmod xdmod-shredder -r 'robertson' -f slurm -i $REF_DIR/robertson-filter-log/robertson-filter-test.log
     sudo -u xdmod xdmod-ingestor --start-date "2016-12-01" --end-date "2022-01-01" --last-modified-start-date "2017-01-01 00:00:00"
-    sudo -u xdmod xdmod-build-filter-lists -r Jobs --last-modified-start-date "$last_modified_start_date_update_filter_list"
+    sudo -u xdmod xdmod-build-filter-lists -r Jobs --append
 
     # Make sure that we have the new httpd.conf file in place, this can be removed after the next xdmod/docker image
     # update as it will already be in place.

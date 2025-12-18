@@ -4,6 +4,7 @@ use CCR\DB;
 use CCR\DB\MySQLHelper;
 use CCR\Loggable;
 use DB\Exceptions\TableNotFoundException;
+use DB\EtlJournalHelper;
 use Realm\iGroupBy;
 use Realm\iRealm;
 use DataWarehouse\Query\iQuery;
@@ -49,14 +50,7 @@ class FilterListBuilder extends Loggable
      * @var boolean
      */
     private $appendToList = false;
-
-    /**
-     * Marks if a last_modified column exists on an aggregate table for a realm
-     * 
-     * @var boolean
-     */
-    private $doesLastModifiedColumnExist = false;
-
+    
     /**
      * Name of temporary table to build filter lists from. Holds rows from a realms aggregate table
      * 
@@ -86,7 +80,7 @@ class FilterListBuilder extends Loggable
      * @param string $column Name of column that is has the time a row was last modified. Defauls to last_modified
      * @return boolean
      */
-    private function setDoesLastModifiedColumnExist(string $schema, string $table, string $column="last_modified") {
+    private function doesLastModifiedColumnExist(string $schema, string $table, string $column="last_modified") {
         $db = DB::factory('datawarehouse');
 
         $doesFieldExist = "SELECT * 
@@ -97,7 +91,7 @@ class FilterListBuilder extends Loggable
 
         $result = $db->execute($doesFieldExist, [":schema" => $schema, ":tableName" => $table, ":column" => $column]);
 
-        $this->doesLastModifiedColumnExist =  ($result > 0) ? true : false;
+        return ($result > 0) ? true : false;
     }
 
     /**
@@ -105,7 +99,7 @@ class FilterListBuilder extends Loggable
      *
      * @param string $realmName The name of a realm to build lists for.
      */
-    public function buildRealmLists($realmName)
+    public function buildRealmLists($realmName, $appendToList = false)
     {
         // Get a query for the given realm.
         $startTime = microtime(true);
@@ -126,14 +120,24 @@ class FilterListBuilder extends Loggable
         $tableAliasKey = array_key_first($tables);
         $schema = $tables[$tableAliasKey]->getSchema()->getName();
         $tableName = $tables[$tableAliasKey]->getName();
+        $journalHelper = new EtlJournalHelper($schema, $tableName);
 
-        $this->setDoesLastModifiedColumnExist($schema, $tableName);
-        
-        $appendToList = ($this->doesLastModifiedColumnExist && ($this->lastModifiedStartDate !== null)) ? true : false;
+        // If the last modified column does not exist on the aggregate table then there is no way
+        // to select the most recently aggregated rows so we cannot append new data.
+        if($appendToList && !$this->doesLastModifiedColumnExist($schema, $tableName)) {
+            $appendToList = false;
+        }
+
+        if($appendToList && $this->doesLastModifiedColumnExist($schema, $tableName) && !strtotime($journalHelper->getLastModified())) {
+            $appendToList = false;
+        }
+
         $this->setAppendToList($appendToList);
 
         if($this->appendToList) {
             $db = DB::factory('datawarehouse');
+            $lastModified = $journalHelper->getLastModified();
+            $this->setLastModifiedStartDate($lastModified);
             $tempTableSql = "CREATE TEMPORARY TABLE $this->filterTemporaryTable AS SELECT * FROM $schema.$tableName where last_modified >= '$this->lastModifiedStartDate'";
             $this->logger->debug("Creating temporary table: $tempTableSql");
             $db->execute($tempTableSql);
@@ -148,12 +152,15 @@ class FilterListBuilder extends Loggable
             $db->execute("DROP TEMPORARY TABLE IF EXISTS $this->filterTemporaryTable");
         }
 
+        $endTime = microtime(true);
+        $journalHelper->markAsDone(date("Y-m-d h:i:s", $startTime), date("Y-m-d h:i:s", $endTime));
+
         $this->logger->notice(
             'end',
             [
                 'action' => $realmName . '.build-filter-list',
                 'start_time' => $startTime,
-                'end_time' => microtime(true)
+                'end_time' => $endTime
             ]
         );
     }
