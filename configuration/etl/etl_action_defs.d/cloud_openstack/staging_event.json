@@ -79,7 +79,7 @@
                 "name": "instance_type",
                 "schema": "${SOURCE_SCHEMA}",
                 "alias": "itype",
-                "on": "itype.instance_type = raw.instance_type AND itype.resource_id = raw.resource_id AND itype.num_cores = raw.num_cores AND itype.memory_mb = raw.memory_mb AND itype.disk_gb = raw.disk_gb",
+                "on": "itype.instance_type = raw.instance_type AND itype.resource_id = raw.resource_id AND itype.num_cores = raw.num_cores AND itype.memory_mb = raw.memory_mb AND itype.disk_gb = raw.disk_gb AND (UNIX_TIMESTAMP(CONVERT_TZ(raw.event_time_utc,'+00:00', @@session.time_zone)) between itype.start_time and IFNULL(itype.end_time, 253402318799))",
                 "type": "LEFT OUTER"
             },
             {
