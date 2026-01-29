@@ -10,6 +10,7 @@
                 "name": "resource_id",
                 "type": "int(11)",
                 "nullable": false,
+                "default": -1,
                 "comment": "Resource to which this type belongs"
             },
             {
