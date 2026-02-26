@@ -465,7 +465,8 @@
             {
                 "name": "index_period",
                 "columns": [
-                    "${AGGREGATION_UNIT}_id"
+                    "${AGGREGATION_UNIT}_id",
+                    "record_resource_id"
                 ]
             }
         ],
