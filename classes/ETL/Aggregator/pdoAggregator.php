@@ -1263,6 +1263,13 @@ class pdoAggregator extends aAggregator
 
         foreach ( $this->etlDestinationTableList as $etlTableKey => $etlTable ) {
             $qualifiedDestTableName = $etlTable->getFullName();
+            $selectCountSql = sprintf(
+                "SELECT COUNT(*) as num_rows FROM %s WHERE %s_id IN (%s)",
+                $qualifiedDestTableName,
+                $aggregationUnit,
+                $aggregationTimePeriods
+            );
+
             $deleteSql = sprintf(
                 "DELETE FROM %s WHERE %s_id IN (%s)",
                 $qualifiedDestTableName,
@@ -1272,12 +1279,29 @@ class pdoAggregator extends aAggregator
 
             if ( count($sqlRestrictions) > 0 ) {
                 $deleteSql .= " AND " . implode(" AND ", $sqlRestrictions);
+                $selectCountSql .= " AND " . implode(" AND ", $sqlRestrictions);
             }
 
-            $this->logger->debug(
-                sprintf("Delete aggregation unit SQL %s:\n%s", $this->destinationEndpoint, $deleteSql)
-            );
-            $totalRowsDeleted += $this->destinationHandle->execute($deleteSql);
+            $rowsToDelete = $this->destinationHandle->query($selectCountSql)[0]['num_rows'];
+
+            $rowsDeleted = 0;
+            $deleteIncrement = 10000;
+
+            //$this->logger->debug(
+            //    sprintf("Delete aggregation unit SQL %s:\n%s", $this->destinationEndpoint, $deleteSql)
+            //);
+
+            while ( $rowsDeleted < $rowsToDelete ) {
+                $batchDeleteSql = $deleteSql . " LIMIT $deleteIncrement";
+                $this->logger->debug(
+                    sprintf("Batch delete aggregation unit SQL %s:\n%s", $this->destinationEndpoint, $batchDeleteSql)
+                );
+                $rowsDeleted += $this->destinationHandle->execute($batchDeleteSql);
+                $this->logger->debug(sprintf("Deleted %s rows", $rowsDeleted));
+            }
+
+            $totalRowsDeleted += $rowsDeleted;  
+            //$totalRowsDeleted += $this->destinationHandle->execute($deleteSql);
         }
 
         return $totalRowsDeleted;
