@@ -227,7 +227,32 @@
             "description": "Aggregate HPC job records",
             "definition_file": "jobs/hpc-aggregation.json",
             "table_prefix": "jobfact_by_",
-            "aggregation_units": ["month", "quarter", "year"]
+            "aggregation_units": ["month", "quarter"]
+        },
+        {
+            "name": "aggregate-year",
+            "endpoints": {
+                "source": {
+                    "type": "mysql",
+                    "name": "Job Record/Task database",
+                    "config": "datawarehouse",
+                    "schema": "modw"
+                },
+                "destination": {
+                    "type": "mysql",
+                    "name": "Aggregates Database",
+                    "config": "datawarehouse",
+                    "schema": "modw_aggregates",
+                    "create_schema_if_not_exists": true
+                }
+            },
+            "namespace": "ETL\\Aggregator",
+            "options_class": "AggregatorOptions",
+            "class": "SimpleAggregator",
+            "description": "Aggregate HPC job records",
+            "definition_file": "jobs/hpc-aggregation.json",
+            "table_prefix": "jobfact_by_",
+            "aggregation_units": ["year"]
         },
         {
             "name": "aggregation-joblist",
