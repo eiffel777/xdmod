@@ -1,12 +1,6 @@
 <?php
 
-namespace ComponentTests\DB;
-
-<<<<<<< HEAD
-use ComponentTests\BaseTest;
-
-=======
->>>>>>> b90eaadc07858e2468d6a601caaf1d23997dfdb5
+namespace ComponentTests;
 class EtlJournalTest extends BaseTest
 {
     public function testJournal()
