@@ -970,13 +970,37 @@ class GroupBy extends \CCR\Loggable implements iGroupBy
 
             foreach ( $this->attributeToAggregateKeyMap as $attributeKey => $aggregateKey ) {
                 $alias = $this->qualifyColumnName($attributeKey, true);
-                // Aggregation unit group bys use the date table rather than the attribute table
-                $tableObj = ( $this->isAggregationUnit ? $query->getDateTable() : $this->attributeTableObj );
-                $groupByField = new TableField(
-                    $tableObj,
-                    ($useAlternateGroupBy ? $this->alternateGroupByColumns[$mapIndex++] : $attributeKey),
-                    $alias
-                );
+
+                if ( $useAlternateGroupBy ) {
+                    // alternate_group_by_columns use dimension table columns whose grouping
+                    // semantics differ from the aggregate FK (e.g., directorate_id rolls up
+                    // multiple fos_id values; username intentionally merges across resources).
+                    // Keep on the dimension table.
+                    $tableObj   = $this->attributeTableObj;
+                    $columnName = $this->alternateGroupByColumns[$mapIndex++];
+                } else {
+                    // Standard case: $aggregateKey is the FK column on the aggregate fact table.
+                    // For time-period group bys (isAggregationUnit=true), $aggregateKey is e.g.
+                    // "day_id". For dimension group bys it is e.g. "person_id".
+                    // Using the aggregate column for both lets the optimizer satisfy the timeseries
+                    // GROUP BY (day_id, person_id) from the composite index without a sort.
+                    //
+                    // Guard: only use the aggregate table when getDateTable() is non-null.
+                    // getDimensionValuesQuery() calls setDuration(null, null), which returns early
+                    // before setting _date_table, leaving getDateTable() === null and omitting the
+                    // aggregate table from the FROM clause. Referencing agg.X there causes
+                    // "Unknown column 'agg.X' in 'group statement'". Fall back to the dimension
+                    // table in that context.
+                    if ( $query->getDateTable() !== null ) {
+                        $tableObj   = $query->getDataTable();
+                        $columnName = $aggregateKey;
+                    } else {
+                        $tableObj   = $this->attributeTableObj;
+                        $columnName = $attributeKey;
+                    }
+                }
+
+                $groupByField = new TableField($tableObj, $columnName, $alias);
                 $query->addGroup($groupByField);
 
                 // The aggregation unit where condition is already added by Query::setDuration()
@@ -991,7 +1015,7 @@ class GroupBy extends \CCR\Loggable implements iGroupBy
                     }
 
                     $where = new WhereCondition(
-                        new TableField(!empty($alternateAttributeTableObj) ? $alternateAttributeTableObj : $tableObj, $attributeKey),
+                        new TableField(!empty($alternateAttributeTableObj) ? $alternateAttributeTableObj : $this->attributeTableObj, $attributeKey),
                         '=',
                         new TableField($query->getDataTable(), $aggregateKey)
                     );

@@ -89,8 +89,8 @@ WHERE
   duration.id = agg.day_id
   AND agg.day_id between 201600357 and 201700001
   AND person.id = agg.person_id
-GROUP BY duration.id,
-  person.id
+GROUP BY agg.day_id,
+  agg.person_id
 HAVING person_id = 82
 ORDER BY duration.id ASC,
   person.order_id ASC
@@ -117,7 +117,7 @@ WHERE
   duration.id = agg.day_id
   AND agg.day_id between 201600357 and 201700001
   AND person.id = agg.person_id
-GROUP BY person.id
+GROUP BY agg.person_id
 ORDER BY job_count desc,
   person.order_id ASC
 LIMIT 10 OFFSET 0

@@ -90,7 +90,7 @@ WHERE
   duration.id = agg.day_id
   AND agg.day_id between 201600357 and 201700001
   AND person.id = agg.person_id
-GROUP BY person.id
+GROUP BY agg.person_id
 ORDER BY person.order_id ASC
 SQL;
         $this->assertEquals($expected, $generated, 'Aggregate query no statistic');
@@ -169,7 +169,7 @@ WHERE
   duration.id = agg.day_id
   AND agg.day_id between 201600357 and 201700001
   AND person.id = agg.person_id
-GROUP BY person.id
+GROUP BY agg.person_id
 ORDER BY person.order_id ASC
 SQL;
         $this->assertEquals($expected, $generated, 'Aggregate query group by and main statistic');
@@ -246,7 +246,7 @@ WHERE
   duration.id = agg.day_id
   AND agg.day_id between 201600357 and 201700001
   AND person.id = agg.person_id
-GROUP BY person.id
+GROUP BY agg.person_id
 ORDER BY person.order_id ASC
 SQL;
         $this->assertEquals($expected, $generated, 'Aggregate query add group by and statistic');
@@ -293,7 +293,7 @@ WHERE
   duration.id = agg.day_id
   AND agg.day_id between 201600357 and 201700001
   AND person.id = agg.person_id
-GROUP BY person.id
+GROUP BY agg.person_id
 ORDER BY job_count desc,
   person.order_id ASC
 LIMIT 10 OFFSET 0
@@ -302,22 +302,9 @@ SQL;
 
         $generated = $query->getCountQueryString();
         $expected =<<<SQL
-SELECT
-  COUNT(*) AS row_count
-FROM (
-  SELECT STRAIGHT_JOIN
-  SUM(1) AS total
-  FROM
-    modw_aggregates.jobfact_by_day agg,
-    modw.days duration,
-    modw.person person
-  WHERE
-    duration.id = agg.day_id
-    AND agg.day_id between 201600357 and 201700001
-    AND person.id = agg.person_id
-  GROUP BY
-    person.id
-) AS a WHERE a.total IS NOT NULL
+SELECT COUNT(DISTINCT agg.person_id) AS row_count
+FROM modw_aggregates.jobfact_by_day agg
+WHERE agg.day_id between 201600357 and 201700001
 SQL;
         $this->assertEquals($expected, $generated, 'Aggregate query count with group by add statistic ');
     }
@@ -365,7 +352,7 @@ WHERE
   AND agg.day_id between 201600357 and 201700001
   AND queue.id = agg.queue
   AND queue.resource_id = agg.task_resource_id
-GROUP BY queue.id
+GROUP BY agg.queue
 ORDER BY job_count desc,
   queue.id ASC
 SQL;
@@ -464,7 +451,7 @@ WHERE
   AND agg.day_id between 201600357 and 201700001
   AND person.id = agg.person_id
   AND person.id > ('constraint')
-GROUP BY person.id
+GROUP BY agg.person_id
 ORDER BY person.order_id ASC
 SQL;
 
@@ -520,22 +507,9 @@ SQL;
 
         $generated = $query->getCountQueryString();
         $expected =<<<SQL
-SELECT
-  COUNT(*) AS row_count
-FROM (
-  SELECT STRAIGHT_JOIN
-  SUM(1) AS total
-  FROM
-    modw_aggregates.jobfact_by_day agg,
-    modw.days duration,
-    modw.person person
-  WHERE
-    duration.id = agg.day_id
-    AND agg.day_id between 201600357 and 201700001
-    AND person.id = agg.person_id
-  GROUP BY
-    person.id
-) AS a WHERE a.total IS NOT NULL
+SELECT COUNT(DISTINCT agg.person_id) AS row_count
+FROM modw_aggregates.jobfact_by_day agg
+WHERE agg.day_id between 201600357 and 201700001
 SQL;
         $this->assertEquals($expected, $generated, 'Aggregate query count');
     }
