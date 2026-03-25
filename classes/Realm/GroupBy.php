@@ -1231,12 +1231,19 @@ class GroupBy extends \CCR\Loggable implements iGroupBy
         $useAlternateGroupBy = (0 != count($this->alternateGroupByColumns));
 
         foreach ( $attributeKeyConstraints as $attributeKey => $valueList ) {
+            if ( $useAlternateGroupBy ) {
+                // Alternate group-by columns (e.g. username, directorate_id) live on the
+                // dimension table and have no direct equivalent on the aggregate table.
+                $columnRef = sprintf('%s.%s', $this->attributeTableName, $this->alternateGroupByColumns[$mapIndex++]);
+            } else {
+                // Standard case: filter on the aggregate table's FK column so the optimizer
+                // can satisfy the IN predicate from the composite index without joining the
+                // dimension table first.
+                $aggregateKey = $this->attributeToAggregateKeyMap[$attributeKey];
+                $columnRef = sprintf('%s.%s', $aggregateTableName->getAlias(), $aggregateKey);
+            }
             $where = new WhereCondition(
-                sprintf(
-                    '%s.%s',
-                    $this->attributeTableName,
-                    ($useAlternateGroupBy ? $this->alternateGroupByColumns[$mapIndex++] : $attributeKey)
-                ),
+                $columnRef,
                 $operation,
                 sprintf("('%s')", implode("','", $valueList))
             );
