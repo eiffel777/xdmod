@@ -598,14 +598,24 @@ class Query extends Loggable
     public function getRawStatement($limit = null, $offset = null, $extraHavingClause = null)
     {
         $query_string = $this->getQueryString($limit, $offset, $extraHavingClause);
-        return DB::factory($this->_db_profile)->query($query_string, $this->pdoparams, true);
+        $time_start = microtime(true);
+        $result = DB::factory($this->_db_profile)->query($query_string, $this->pdoparams, true);
+        $this->logger->debug(sprintf("%s %s() took %.4f seconds", $this, __FUNCTION__, microtime(true) - $time_start));
+        return $result;
+        //return DB::factory($this->_db_profile)->query($query_string, $this->pdoparams, true);
+
     }
 
     public function getCount()
     {
-        $count_result = DB::factory($this->_db_profile)->query($this->getCountQueryString(), $this->pdoparams);
+        //$count_result = DB::factory($this->_db_profile)->query($this->getCountQueryString(), $this->pdoparams);
 
+        $count_query = $this->getCountQueryString();
+        $time_start = microtime(true);
+        $count_result = DB::factory($this->_db_profile)->query($count_query, $this->pdoparams);
+        $this->logger->debug(sprintf("%s %s() took %.4f seconds", $this, __FUNCTION__, microtime(true) - $time_start));
         return $count_result[0]['row_count'];
+
     }
 
     public function getDimensionValues()
@@ -743,7 +753,7 @@ SQL;
         $select_order_by = $this->getSelectOrderBy();
 
         $format = <<<SQL
-SELECT STRAIGHT_JOIN%s
+SELECT SQL_NO_CACHE%s
   %s
 FROM
   %s%s
@@ -786,10 +796,10 @@ SQL;
             $select_tables = $this->getSelectTables();
             $select_fields = $this->getSelectFields();
             $format = <<<SQL
-SELECT
+SELECT SQL_NO_CACHE
   COUNT(*) AS row_count
 FROM (
-  SELECT STRAIGHT_JOIN
+  SELECT
   %s AS total
   FROM
     %s
@@ -867,7 +877,7 @@ SQL;
 
         $groupCols  = implode(', ', array_map('strval', $groups));
         $whereStr   = implode("\n  AND ", $filteredWheres);
-        $data_query = "SELECT COUNT(DISTINCT $groupCols) AS row_count\nFROM $fromClause\nWHERE $whereStr";
+        $data_query = "SELECT SQL_NO_CACHE COUNT(DISTINCT $groupCols) AS row_count\nFROM $fromClause\nWHERE $whereStr";
 
         $this->logger->debug(sprintf("%s %s()\n%s", $this, __FUNCTION__, $data_query));
         return $data_query;
