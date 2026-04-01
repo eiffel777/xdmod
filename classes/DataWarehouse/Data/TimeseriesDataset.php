@@ -3,7 +3,7 @@
 namespace DataWarehouse\Data;
 
 use CCR\DB;
-
+use CCR\DB\PDODB;
 use \DataWarehouse\Query\TimeseriesQuery;
 
 use \DataWarehouse\Query\Model\Table;
@@ -62,19 +62,32 @@ class TimeseriesDataset
      */
     protected function getSeriesIds($limit, $offset)
     {
+        $logger = \CCR\Log::factory(
+                'datawarehouse.query',
+                array(
+                    'console' => false,
+                    'db' => false,
+                    'mail' => false,
+                    'file' => LOG_DIR . '/query2.log',
+                    'fileLogLevel' => PDODB::debugging() ? \CCR\Log::DEBUG : \CCR\Log::NOTICE
+                )
+            );
+
         $statement = $this->agg_query->getRawStatement($limit, $offset);
+        $start = microtime(true);
         $statement->execute();
+        $logger->debug(sprintf("Aggregate query executed in %f seconds\n-----------------------------------------------------------", microtime(true) - $start));
 
         $groupBys = $this->agg_query->getGroupBys();
         $groupInstance = reset($groupBys);
         $groupIdColumn = $groupInstance->getId() . '_id';
 
         $seriesIds = array();
-
+        $start = microtime(true);
         while($row = $statement->fetch(\PDO::FETCH_ASSOC, \PDO::FETCH_ORI_NEXT)) {
             $seriesIds[] = "${row[$groupIdColumn]}";
         }
-
+        $logger->debug(sprintf("Fetch of series ids executed in %f seconds\n-----------------------------------------------------------", microtime(true) - $start));
         return $seriesIds;
     }
 
@@ -137,8 +150,21 @@ class TimeseriesDataset
             return array();
         }
 
+        $logger = \CCR\Log::factory(
+                'datawarehouse.query',
+                array(
+                    'console' => false,
+                    'db' => false,
+                    'mail' => false,
+                    'file' => LOG_DIR . '/query2.log',
+                    'fileLogLevel' => PDODB::debugging() ? \CCR\Log::DEBUG : \CCR\Log::NOTICE
+                )
+            );
+
         $statement = $this->query->getRawStatement();
+        $start = microtime(true);
         $statement->execute();
+        $logger->debug(sprintf("getDatasets query executed in %f seconds\n-----------------------------------------------------------", microtime(true) - $start));
 
         $columnTypes = array();
         for ($end = $statement->columnCount(), $i = 0; $i < $end; $i++) {
@@ -151,6 +177,7 @@ class TimeseriesDataset
             $dataSets[$seriesId] = null;
         }
 
+        $start = microtime(true);
         while($row = $statement->fetch(\PDO::FETCH_ASSOC, \PDO::FETCH_ORI_NEXT)) {
 
             $seriesId = $row[$spaceGroup->getId() . '_id'];
@@ -188,6 +215,7 @@ class TimeseriesDataset
 
             $dataSet->addDatum($start_ts, $value, $error);
         }
+        $logger->debug(sprintf("Fetch of dataset rows executed in %f seconds\n-----------------------------------------------------------", microtime(true) - $start));
 
         $retVal = array_values($dataSets);
 

@@ -185,7 +185,10 @@ class PDODB implements iDatabase
         if ($returnStatement !== false) {
             return $stmt;
         } else {
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $start = microtime(true);
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $this->logger->debug(sprintf("Fetch executed in %f seconds\n-----------------------------------------------------------", microtime(true) - $start));
+            return $result;
         }
     } // query()
 
