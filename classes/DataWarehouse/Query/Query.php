@@ -784,18 +784,13 @@ SQL;
 
     public function getCountQueryString()
     {
+        $wheres = $this->getWhereConditions();
         $groups = $this->getGroups();
 
-        // Fall back to the original subquery logic for:
-        // - isDistinct queries (RawData/JobDataset)
-        // - queries without a date table (getDimensionValuesQuery() context)
-        // - queries with no GROUP BY (e.g. group-by-none), where COUNT(DISTINCT) would
-        //   have no column arguments
-        if ($this->isDistinct || $this->_date_table === null || empty($groups)) {
-            $wheres        = $this->getWhereConditions();
-            $select_tables = $this->getSelectTables();
-            $select_fields = $this->getSelectFields();
-            $format = <<<SQL
+        $select_tables = $this->getSelectTables();
+        $select_fields = $this->getSelectFields();
+
+        $format = <<<SQL
 SELECT SQL_NO_CACHE
   COUNT(*) AS row_count
 FROM (
@@ -808,78 +803,18 @@ FROM (
   %s
 ) AS a WHERE a.total IS NOT NULL
 SQL;
-            $data_query = sprintf(
-                $format,
-                ( $this->isDistinct ? 'DISTINCT ' . implode(', ', $select_fields) . ', 1' : 'SUM(1)' ),
-                implode(",\n    ", $select_tables),
-                implode("\n    AND ", $wheres),
-                ( count($groups) > 0 ? "GROUP BY\n    " . implode(",\n    ", $groups) : "" )
-            );
-            $this->logger->debug(sprintf("%s %s()\n%s", $this, __FUNCTION__, $data_query));
-            return $data_query;
-        }
-
-        $dataTableAlias  = (string)$this->_data_table->getAlias();
-        $dataTablePrefix = $dataTableAlias . '.';
-        $durationAlias   = (string)$this->_date_table->getAlias(); // always "duration"
-
-        // Determine whether all GROUP BY columns are on the aggregate table.
-        // Standard group-bys have GROUP BY on agg.* (e.g. agg.person_id).
-        // Alternate group-bys (username, nsfdirectorate, etc.) have GROUP BY on a
-        // dimension table column (e.g. systemaccount.username) and need that table.
-        $allGroupsOnAggTable = !empty($groups) && array_reduce(
-            $groups,
-            function ($carry, $group) use ($dataTablePrefix) {
-                return $carry && strpos((string)$group, $dataTablePrefix) === 0;
-            },
-            true
+        $data_query = sprintf(
+            $format,
+            ( $this->isDistinct ? 'DISTINCT ' . implode(', ', $select_fields) . ', 1' : 'SUM(1)' ),
+            implode(",\n    ", $select_tables),
+            implode("\n    AND ", $wheres),
+            ( count($groups) > 0 ? "GROUP BY\n    " . implode(",\n    ", $groups) : "" )
         );
 
-        if ($allGroupsOnAggTable) {
-            // Only the aggregate table is needed. Drop the duration and dimension tables
-            // and any WHERE conditions that reference them.
-            $otherPrefixes = [];
-            foreach (array_keys($this->getTables()) as $alias) {
-                if ($alias !== $dataTableAlias) {
-                    $otherPrefixes[] = $alias . '.';
-                }
-            }
-            $filteredWheres = array_filter(
-                $this->getWhereConditions(),
-                function ($key) use ($otherPrefixes) {
-                    foreach ($otherPrefixes as $prefix) {
-                        if (strpos($key, $prefix) === 0) {
-                            return false;
-                        }
-                    }
-                    return true;
-                },
-                ARRAY_FILTER_USE_KEY
-            );
-            $fromClause = $this->_data_table->getQualifiedName(true, true);
-        } else {
-            // Alternate group-by: keep agg + dimension table(s), drop only the duration
-            // table and its join condition.
-            $tables = $this->getTables();
-            unset($tables[$durationAlias]);
-            $fromClause = implode(",\n  ", array_map(
-                function ($t) { return $t->getQualifiedName(true, true); },
-                $tables
-            ));
-            $filteredWheres = array_filter(
-                $this->getWhereConditions(),
-                function ($key) use ($durationAlias) {
-                    return strpos($key, $durationAlias . '.') !== 0;
-                },
-                ARRAY_FILTER_USE_KEY
-            );
-        }
+        $this->logger->debug(
+            sprintf("%s %s()\n%s", $this, __FUNCTION__, $data_query)
+        );
 
-        $groupCols  = implode(', ', array_map('strval', $groups));
-        $whereStr   = implode("\n  AND ", $filteredWheres);
-        $data_query = "SELECT SQL_NO_CACHE COUNT(DISTINCT $groupCols) AS row_count\nFROM $fromClause\nWHERE $whereStr";
-
-        $this->logger->debug(sprintf("%s %s()\n%s", $this, __FUNCTION__, $data_query));
         return $data_query;
     }
 

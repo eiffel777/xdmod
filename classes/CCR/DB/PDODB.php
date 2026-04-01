@@ -23,6 +23,8 @@
 namespace CCR\DB;
 
 use PDO;
+use Log;
+use Loggable;
 use Exception;
 
 class PDODB implements iDatabase
@@ -49,6 +51,7 @@ class PDODB implements iDatabase
     protected static $debug_mode = false;
     protected static $queries = array();
     protected static $params = array();
+    protected $logger = null;
 
     // --------------------------------------------------------------------------------
     // @see iDatabase::__construct()
@@ -63,6 +66,20 @@ class PDODB implements iDatabase
         $this->_db_username = $db_username;
         $this->_db_password = $db_password;
         $this->dsn_extra = $dsn_extra;
+
+        if( $this->logger === null) {
+            $this->logger = \CCR\Log::factory(
+                'datawarehouse.query',
+                array(
+                    'console' => false,
+                    'db' => false,
+                    'mail' => false,
+                    'file' => LOG_DIR . '/query2.log',
+                    'fileLogLevel' => self::debugging() ? \CCR\Log::DEBUG : \CCR\Log::NOTICE
+                )
+            );
+        }
+        
     } // __construct()
 
     // --------------------------------------------------------------------------------
@@ -156,10 +173,15 @@ class PDODB implements iDatabase
             // TODO: setup the logger and log this.
         }
 
+        $start = microtime(true);
+
         if (false === $stmt->execute($params)) {
             list($sqlState, $errorCode, $errorMsg) = $stmt->errorInfo;
             throw new Exception("$sqlState: $errorMsg ($errorCode)");
         }
+
+        $this->logger->debug(sprintf("Query executed in %f seconds\n-----------------------------------------------------------", microtime(true) - $start));
+
         if ($returnStatement !== false) {
             return $stmt;
         } else {
@@ -359,7 +381,7 @@ class PDODB implements iDatabase
         );
 
         if (!$generalDebugEnabled) {
-            return false;
+            #return false;
         }
 
         $sql_debug_mode = false;
@@ -370,15 +392,18 @@ class PDODB implements iDatabase
                 FILTER_VALIDATE_BOOLEAN
             );
         } catch (Exception $e) {
+            $sql_debug_mode = false;
         }
 
         return  $sql_debug_mode || PDODB::$debug_mode;
     }
 
     private function debug($query, $params)
-    {
+    {        
         PDODB::$queries[] = trim(preg_replace("(\s+)", " ", $query));
         PDODB::$params[] = PDODB::protectParams($params);
+
+        $this->logger->debug(sprintf("%s\nQuery: %s\nParams: %s\nCalled From: \n%s\n%s\n", json_encode($this), $query, json_encode(PDODB::protectParams($params)), debug_backtrace()[0]['file'] . debug_backtrace()[0]['line'], debug_backtrace()[1]['file'] . ':' . debug_backtrace()[1]['line']));
     }
 
     private static function protectParams($params)
