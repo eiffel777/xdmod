@@ -74,9 +74,9 @@ class TimeseriesDataset
             );
 
         $statement = $this->agg_query->getRawStatement($limit, $offset);
-        $start = microtime(true);
-        $statement->execute();
-        $logger->debug(sprintf("Aggregate query executed in %f seconds\n-----------------------------------------------------------", microtime(true) - $start));
+        //$start = microtime(true);
+        //$statement->execute();
+        //$logger->debug(sprintf("Aggregate query executed in %f seconds\n-----------------------------------------------------------", microtime(true) - $start));
 
         $groupBys = $this->agg_query->getGroupBys();
         $groupInstance = reset($groupBys);
@@ -162,9 +162,9 @@ class TimeseriesDataset
             );
 
         $statement = $this->query->getRawStatement();
-        $start = microtime(true);
-        $statement->execute();
-        $logger->debug(sprintf("getDatasets query executed in %f seconds\n-----------------------------------------------------------", microtime(true) - $start));
+        //$start = microtime(true);
+        //$statement->execute();
+        //$logger->debug(sprintf("getDatasets query executed in %f seconds\n-----------------------------------------------------------", microtime(true) - $start));
 
         $columnTypes = array();
         for ($end = $statement->columnCount(), $i = 0; $i < $end; $i++) {

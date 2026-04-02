@@ -794,7 +794,7 @@ SQL;
 SELECT SQL_NO_CACHE
   COUNT(*) AS row_count
 FROM (
-  SELECT
+  SELECT 
   %s AS total
   FROM
     %s
@@ -1422,7 +1422,7 @@ SQL;
         );
         $this->addWhereCondition(
             new \DataWarehouse\Query\Model\WhereCondition(
-                $data_table_date_id_field,
+                $date_id_field,
                 'between',
                 new \DataWarehouse\Query\Model\Field(
                     sprintf("%s and %s", $this->_min_date_id, $this->_max_date_id)
