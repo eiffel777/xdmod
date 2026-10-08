@@ -132,4 +132,103 @@ LIMIT 10 OFFSET 0
 SQL;
         $this->assertEquals($expectedAgg, $generatedAgg, 'Timeseries associated Aggregate query');
     }
+
+    /**
+     * Test a timeseries query containing a statistic with derived fields.
+     */
+
+    public function testTimeseriesQueryDerivedStatistic()
+    {
+        $query = new \DataWarehouse\Query\TimeseriesQuery(
+            'Jobs',
+            'day',
+            '2016-12-01',
+            '2017-01-31',
+            'person',
+            'job_count'
+        );
+        $query->addStatField($this->getDerivedStatistic());
+        $query->addOrderBy('jobs_per_person', 'desc');
+
+        $generated = $query->getQueryString(10, 0, 'person_id = 82');
+        $expected =<<<SQL
+SELECT
+  derived_stats.`person_id` AS 'person_id',
+  derived_stats.`person_short_name` AS 'person_short_name',
+  derived_stats.`person_name` AS 'person_name',
+  derived_stats.`person_order_id` AS 'person_order_id',
+  derived_stats.`day_id` AS 'day_id',
+  derived_stats.`day_short_name` AS 'day_short_name',
+  derived_stats.`day_name` AS 'day_name',
+  derived_stats.`day_start_ts` AS 'day_start_ts',
+  derived_stats.running_job_count AS running_job_count,
+  derived_stats.job_count AS job_count,
+  derived_stats.jobs_per_person__job_count / NULLIF((SELECT COUNT(*) FROM modw.person AS p WHERE FIND_IN_SET(p.id, derived_stats.jobs_per_person__person_ids) <> 0 AND derived_stats.jobs_per_person__period_id > 0), 0) AS jobs_per_person
+FROM (
+SELECT
+  person.id as 'person_id',
+  person.short_name as 'person_short_name',
+  person.long_name as 'person_name',
+  person.order_id as 'person_order_id',
+  duration.id as 'day_id',
+  DATE(duration.day_start) as 'day_short_name',
+  DATE(duration.day_start) as 'day_name',
+  duration.day_start_ts as 'day_start_ts',
+  SUM(agg.running_job_count) AS running_job_count,
+  COALESCE(SUM(agg.ended_job_count), 0) AS job_count,
+  SUM(agg.ended_job_count) AS jobs_per_person__job_count,
+  GROUP_CONCAT(DISTINCT agg.person_id) AS jobs_per_person__person_ids,
+  MIN(agg.day_id) AS jobs_per_person__period_id,
+  MIN(person.order_id) AS _order_1,
+  MIN(duration.id) AS _order_2
+FROM
+  modw_aggregates.jobfact_by_day agg,
+  modw.days duration,
+  modw.person person
+WHERE
+  duration.id = agg.day_id
+  AND agg.day_id between 201600357 and 201700001
+  AND person.id = agg.person_id
+GROUP BY person.id,
+  person.short_name,
+  person.long_name,
+  person.order_id,
+  duration.id,
+  duration.day_start,
+  duration.day_start_ts
+) AS derived_stats
+HAVING person_id = 82
+ORDER BY jobs_per_person desc,
+  derived_stats._order_1 ASC,
+  derived_stats._order_2 ASC
+LIMIT 10 OFFSET 0
+SQL;
+        $this->assertEquals($expected, $generated, 'Timeseries query with derived statistic');
+    }
+
+    /**
+     * Create a statistic that is evaluated against a derived table. The formula uses a per-group
+     * GROUP_CONCAT() inside a subquery, which ONLY_FULL_GROUP_BY rejects on MariaDB prior to 11
+     * unless the grouping is done in a derived table.
+     *
+     * @return \Realm\Statistic
+     */
+
+    private function getDerivedStatistic()
+    {
+        $config = json_decode('{
+            "name": "Jobs Per Person",
+            "unit": "Number of Jobs",
+            "description_html": "Statistic evaluated against a derived table",
+            "derived_fields": {
+                "job_count": "SUM(agg.ended_job_count)",
+                "person_ids": "GROUP_CONCAT(DISTINCT agg.person_id)",
+                "period_id": "MIN(agg.${AGGREGATION_UNIT}_id)"
+            },
+            "aggregate_formula": "${derived.job_count} / NULLIF((SELECT COUNT(*) FROM modw.person AS p WHERE FIND_IN_SET(p.id, ${derived.person_ids}) <> 0), 0)",
+            "timeseries_formula": "${derived.job_count} / NULLIF((SELECT COUNT(*) FROM modw.person AS p WHERE FIND_IN_SET(p.id, ${derived.person_ids}) <> 0 AND ${derived.period_id} > 0), 0)"
+        }');
+
+        return \Realm\Statistic::factory('jobs_per_person', $config, \Realm\Realm::factory('Jobs', self::$logger), self::$logger);
+    }
 }
